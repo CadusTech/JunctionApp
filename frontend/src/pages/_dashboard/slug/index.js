@@ -184,6 +184,15 @@ export default () => {
                         label: t('Hackerpack_'),
                         component: HackerpackPage,
                     },
+                    {
+                        key: 'challenges',
+                        path: '/challenges',
+                        exact: true,
+                        icon: <AmpStoriesIcon />,
+                        hidden: !shownPages.hackerPack,
+                        label: t('Challenges_'),
+                        component: HackerpackPage,
+                    },
                 ]}
             />
         </PageWrapper>
