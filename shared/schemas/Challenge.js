@@ -1,5 +1,10 @@
 const mongoose = require('mongoose')
-const { GraphQLObjectType, GraphQLString, GraphQLInputObjectType, isNonNullType, GraphQLNonNull } = require('graphql')
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLInputObjectType,
+    GraphQLNonNull
+} = require('graphql')
 const CloudinaryImageSchema = require('./CloudinaryImage')
 
 const ChallengeSchema = new mongoose.Schema({
@@ -132,7 +137,7 @@ const ChallengeInput = new GraphQLInputObjectType({
             type: GraphQLString,
         },
         logo: {
-            type: CloudinaryImageSchema.graphql,
+            type: CloudinaryImageSchema.graphqlInput,
         }
     }
 })
