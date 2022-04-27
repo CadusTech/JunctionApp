@@ -130,7 +130,7 @@ const EventInput = new GraphQLInputObjectType({
             type: GraphQLBoolean,
         },
         owner: {
-            type: GraphQLNonNull(GraphQLString),
+            type: GraphQLString,
         },
         organisers: {
             type: GraphQLList(GraphQLString),
