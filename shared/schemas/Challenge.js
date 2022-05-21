@@ -48,7 +48,7 @@ const ChallengeSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    company_info: {
+    companyInfo: {
         type: String,
         required: true,
     },
@@ -88,7 +88,7 @@ const ChallengeType = new GraphQLObjectType({
         criteria: {
             type: GraphQLString,
         },
-        company_info: {
+        companyInfo: {
             type: GraphQLString,
         },
         logo: {
@@ -133,7 +133,7 @@ const ChallengeInput = new GraphQLInputObjectType({
         criteria: {
             type: GraphQLString,
         },
-        company_info: {
+        companyInfo: {
             type: GraphQLString,
         },
         logo: {

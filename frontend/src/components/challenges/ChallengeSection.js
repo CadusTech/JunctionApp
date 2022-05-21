@@ -32,7 +32,13 @@ export default ({ partner, title, subtitle, logo, link }) => {
     return (
         <Box className={classes.wrapper}>
             <Box p={3}>
-                <img alt={partner} src={logo} className={classes.companyLogo} />
+                {logo && (
+                    <img
+                        alt={partner}
+                        src={logo.url}
+                        className={classes.companyLogo}
+                    />
+                )}
             </Box>
             <Box p={3}>
                 <Typography variant="h5">{title}</Typography>
@@ -44,8 +50,7 @@ export default ({ partner, title, subtitle, logo, link }) => {
                         eventLabel="myLabel"
                         to={link}
                         target="_blank"
-                    >
-                    </OutboundLink>
+                    ></OutboundLink>
                 </Box>
             </Box>
         </Box>

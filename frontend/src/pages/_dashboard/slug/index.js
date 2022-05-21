@@ -26,7 +26,7 @@ import ReviewingPage from './reviewing'
 import TravelGrantPage from './travel-grant'
 import EventIDPage from './event-id'
 import HackerpackPage from './hackerpack'
-import ChallengesPage from './challenges'
+import ChallengesIndex from './challenges'
 
 import * as DashboardSelectors from 'redux/dashboard/selectors'
 import * as DashboardActions from 'redux/dashboard/actions'
@@ -192,7 +192,7 @@ export default () => {
                         exact: true,
                         icon: <FormatListBulletedIcon />,
                         label: 'Challenges',
-                        component: ChallengesPage,
+                        component: ChallengesIndex,
                     },
                 ]}
             />
