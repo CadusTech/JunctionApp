@@ -3,7 +3,7 @@ const {
     GraphQLObjectType,
     GraphQLString,
     GraphQLInputObjectType,
-    GraphQLNonNull
+    GraphQLNonNull,
 } = require('graphql')
 const CloudinaryImageSchema = require('./CloudinaryImage')
 
@@ -22,37 +22,37 @@ const ChallengeSchema = new mongoose.Schema({
     },
     title: {
         type: String,
-        required: true
+        required: true,
     },
     subtitle: {
         type: String,
-        required: true
+        required: true,
     },
     description: {
         type: String,
-        required: true
+        required: true,
     },
     insights: {
         type: String,
-        required: true
+        required: true,
     },
     resources: {
         type: String,
-        required: true
+        required: true,
     },
     prizes: {
         type: String,
-        required: true
+        required: true,
     },
     criteria: {
         type: String,
-        required: true
+        required: true,
     },
     company_info: {
         type: String,
-        required: true
+        required: true,
     },
-    logo: CloudinaryImageSchema.mongoose
+    logo: CloudinaryImageSchema.mongoose,
 })
 
 const ChallengeType = new GraphQLObjectType({
@@ -93,7 +93,7 @@ const ChallengeType = new GraphQLObjectType({
         },
         logo: {
             type: CloudinaryImageSchema.graphql,
-        }
+        },
     },
 })
 
@@ -138,8 +138,8 @@ const ChallengeInput = new GraphQLInputObjectType({
         },
         logo: {
             type: CloudinaryImageSchema.graphqlInput,
-        }
-    }
+        },
+    },
 })
 
 module.exports = {
