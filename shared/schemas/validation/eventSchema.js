@@ -40,7 +40,7 @@ const challenge = yup.object().shape({
     resources: yup.string(),
     prizes: yup.string(),
     criteria: yup.string(),
-    company_info: yup.string(),
+    companyInfo: yup.string(),
     logo: cloudinaryImage,
 })
 

@@ -75,7 +75,7 @@ export default ({ value, onChange }) => {
             setResources(value[index].resources)
             setPrizes(value[index].prizes)
             setCriteria(value[index].criteria)
-            setCompanyInfo(value[index].company_info)
+            setCompanyInfo(value[index].companyInfo)
             setLogo(value[index].logo)
         },
         [value],
@@ -114,7 +114,7 @@ export default ({ value, onChange }) => {
                             resources,
                             prizes,
                             criteria,
-                            company_info: companyInfo,
+                            companyInfo: companyInfo,
                             logo,
                         }
                     }
@@ -134,7 +134,7 @@ export default ({ value, onChange }) => {
                     resources,
                     prizes,
                     criteria,
-                    company_info: companyInfo,
+                    companyInfo: companyInfo,
                     logo,
                 }),
             )
