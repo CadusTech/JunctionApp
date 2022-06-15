@@ -27,10 +27,7 @@ class MessageController {
                 : { recipients: requesterId }),
             ...(read && { readAt: { $ne: null } }),
         }
-        if (recipients || read) {
-            return this._clean(Message.find(query))
-        }
-        return this._clean(Message.find())
+        return this._clean(Message.find(query))
     }
 
     async send(input, requesterId) {
