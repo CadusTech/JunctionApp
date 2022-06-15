@@ -27,7 +27,7 @@ class MessageController {
                 : { recipients: requesterId }),
             ...(read && { readAt: { $ne: null } }),
         }
-        if (recipients) {
+        if (recipients || read) {
             return this._clean(Message.find(query))
         }
         return this._clean(Message.find())
@@ -48,7 +48,7 @@ class MessageController {
     }
 
     async read(messageId, requesterId) {
-        const message = await Message.find({
+        const message = await Message.findOne({
             id: messageId,
             recipients: requesterId,
         })
@@ -62,7 +62,7 @@ class MessageController {
         return this._cleanOne(message.save())
     }
 
-    async readMessages(messageIds, requesterId) {
+    async readMany(messageIds, requesterId) {
         const messages = await Message.find({
             id: { $in: messageIds },
             recipients: requesterId,

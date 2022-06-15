@@ -7,7 +7,7 @@ const {
     GraphQLNonNull,
     GraphQLInputObjectType,
 } = require('graphql')
-const { GraphQLDateTime } = require('graphql-iso-date')
+const { GraphQLDate } = require('graphql-iso-date')
 
 const MessageInput = new GraphQLInputObjectType({
     name: 'MessageInput',
@@ -37,10 +37,10 @@ const MessageType = new GraphQLObjectType({
             type: GraphQLString,
         },
         readAt: {
-            type: GraphQLDateTime,
+            type: GraphQLDate,
         },
         sentAt: {
-            type: GraphQLDateTime,
+            type: GraphQLDate,
         },
     },
 })
@@ -67,18 +67,22 @@ const MutationType = new GraphQLObjectType({
     fields: {
         sendMessage: {
             type: MessageType,
-            args: { message: GraphQLNonNull(MessageInput) },
+            args: {
+                message: { type: GraphQLNonNull(MessageInput) },
+            },
         },
         readMessage: {
             type: MessageType,
             args: {
-                id: GraphQLNonNull(GraphQLID),
+                id: {
+                    type: GraphQLNonNull(GraphQLID),
+                },
             },
         },
         readMany: {
             type: GraphQLList(MessageType),
             args: {
-                ids: GraphQLNonNull(GraphQLList(GraphQLID)),
+                ids: { type: GraphQLNonNull(GraphQLList(GraphQLID)) },
             },
         },
     },
@@ -95,7 +99,10 @@ const Resolvers = {
     },
     Mutation: {
         sendMessage: async (parent, args, context) => {
-            return context.controller('Message').send(args.message)
+            const userId = context.req.user ? context.req.user.sub : null
+            if (!userId) return null
+
+            return context.controller('Message').send(args.message, userId)
         },
         readMessage: async (parent, args, context) => {
             const userId = context.req.user ? context.req.user.sub : null
