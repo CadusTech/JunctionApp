@@ -171,6 +171,13 @@ controller.setTravelGrantDetailsForRegistration = async (
     return registration.save()
 }
 
+controller.updateChecklist = (registrationId, event, data) => {
+    return Registration.findById(registrationId).then(registration => {
+        registration.checklist.items = data.items
+        return registration.save()
+    })
+}
+
 controller.updateTravelGrantDetails = (registrationId, event, data) => {
     return Registration.findById(registrationId).then(registration => {
         if (data.hasOwnProperty('status')) {

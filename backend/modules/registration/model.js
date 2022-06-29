@@ -6,6 +6,7 @@ const {
 } = require('@hackjunction/shared')
 const AnswersSchema = require('@hackjunction/shared/schemas/Answers')
 const TravelGrantDetailsSchema = require('@hackjunction/shared/schemas/TravelGrantDetails')
+const ChecklistSchema = require('@hackjunction/shared/schemas/Checklist')
 const updateAllowedPlugin = require('../../common/plugins/updateAllowed')
 const WebhookService = require('../../common/services/webhook')
 const EmailTaskController = require('../email-task/controller')
@@ -45,6 +46,12 @@ const RegistrationSchema = new mongoose.Schema({
     tags: {
         type: [String],
         default: [],
+    },
+    checklist: {
+        type: ChecklistSchema.mongoose,
+        default: {
+            items: [],
+        },
     },
     answers: {
         type: AnswersSchema.mongoose,

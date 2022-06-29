@@ -91,16 +91,26 @@ const cancelRegistration = asyncHandler(async (req, res) => {
 })
 
 const setTravelGrantDetails = asyncHandler(async (req, res) => {
-    const registration = await RegistrationController.setTravelGrantDetailsForRegistration(
-        req.user,
+    const registration =
+        await RegistrationController.setTravelGrantDetailsForRegistration(
+            req.user,
+            req.event,
+            req.body.data,
+        )
+    return res.status(200).json(registration)
+})
+
+const updateTravelGrantDetails = asyncHandler(async (req, res) => {
+    const registration = await RegistrationController.updateTravelGrantDetails(
+        req.body.registrationId,
         req.event,
         req.body.data,
     )
     return res.status(200).json(registration)
 })
 
-const updateTravelGrantDetails = asyncHandler(async (req, res) => {
-    const registration = await RegistrationController.updateTravelGrantDetails(
+const updateChecklist = asyncHandler(async (req, res) => {
+    const registration = await RegistrationController.updateChecklist(
         req.body.registrationId,
         req.event,
         req.body.data,
@@ -140,18 +150,18 @@ const getRegistrationsForEvent = asyncHandler(async (req, res) => {
 })
 
 const selfAssignRegistrationsForEvent = asyncHandler(async (req, res) => {
-    const registrations = await RegistrationController.selfAssignRegistrationsForEvent(
-        req.event._id.toString(),
-        req.user.sub,
-    )
+    const registrations =
+        await RegistrationController.selfAssignRegistrationsForEvent(
+            req.event._id.toString(),
+            req.user.sub,
+        )
 
     return res.status(200).json(registrations)
 })
 
 const assignRegistrationForEvent = asyncHandler(async (req, res) => {
-    const registration = await RegistrationController.assignRegistrationForEvent(
-        req.body,
-    )
+    const registration =
+        await RegistrationController.assignRegistrationForEvent(req.body)
 
     return res.status(200).json(registration)
 })
@@ -224,6 +234,10 @@ router
 router
     .route('/:slug/travel-grant-details')
     .patch(hasToken, hasRegisteredToEvent, setTravelGrantDetails)
+
+router
+    .route('/:slug/checklist')
+    .patch(hasToken, hasRegisteredToEvent, updateChecklist)
 
 /** Get all registration as organiser */
 router.get(

@@ -1,119 +1,94 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
-import FormLabel from '@material-ui/core/FormLabel'
 import FormControl from '@material-ui/core/FormControl'
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Checkbox from '@material-ui/core/Checkbox'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import PageHeader from 'components/generic/PageHeader'
+import GradientBox from 'components/generic/GradientBox'
+import { Grid } from '@material-ui/core'
 
 import * as DashboardSelectors from 'redux/dashboard/selectors'
-
-const useStyles = makeStyles(theme => ({
-    root: {
-        display: 'flex',
-    },
-    formControl: {
-        margin: theme.spacing(3),
-    },
-}))
+import * as DashboardActions from 'redux/dashboard/actions'
+import * as SnackbarActions from 'redux/snackbar/actions'
 
 export default () => {
-    const classes = useStyles()
-    const hackathonEvent = useSelector(DashboardSelectors.event)
+    const dispatch = useDispatch()
+    const registration = useSelector(DashboardSelectors.registration)
+    const checklistObjects = []
 
-    const [state, setState] = React.useState({
-        firstCB: false,
-        secondCB: false,
-        thirdCB: false,
-        fourthCB: false,
-        fifthCB: false,
+    const [checkboxState, setState] = React.useState({
+        firstCheckboks: registration.checklist.items[0].checked,
+        secondCheckboks: registration.checklist.items[1].checked,
+        thirdCheckboks: registration.checklist.items[2].checked,
+        fourthCheckboks: registration.checklist.items[3].checked,
     })
 
-    const handleChange = event => {
-        setState({ ...state, [event.target.name]: event.target.checked })
+    const initializeChecklistObjects = () => {
+        registration.checklist.items.forEach((item, index) => {
+            checklistObjects.push({
+                title: item.title,
+                checked: Object.values(checkboxState)[index],
+            })
+        })
     }
 
-    const checklistObjectsOffline = [
-        {
-            name: 'first checkbox',
-            state: state[0],
-            label: 'Start searching for team at the venue',
-        },
-        {
-            name: 'second checkbox',
-            state: state[1],
-            label: 'Start coding with your team',
-        },
-        {
-            name: 'third checkbox',
-            state: state[2],
-            label: 'Submit your code',
-        },
-        {
-            name: 'fourth checkbox',
-            state: state[3],
-            label: 'Evaluate at least 5 other projects',
-        },
-        {
-            name: 'fifth checkbox',
-            state: state[4],
-            label: 'Congratulate yourself for a great hackathon success',
-        },
-    ]
+    initializeChecklistObjects()
+    console.log('listii: ', checklistObjects)
 
-    const checklistObjectsOnline = [
-        {
-            name: 'first checkbox',
-            state: state[0],
-            label: 'Start searching for team in the Junction website',
-        },
-        {
-            name: 'second checkbox',
-            state: state[1],
-            label: 'Start coding with your team',
-        },
-        {
-            name: 'third checkbox',
-            state: state[2],
-            label: 'Submit your code',
-        },
-        {
-            name: 'fourth checkbox',
-            state: state[3],
-            label: 'Evaluate at least 5 other projects',
-        },
-        {
-            name: 'fifth checkbox',
-            state: state[4],
-            label: 'Congratulate yourself for a great hackathon success',
-        },
-    ]
+    const handleChange = event => {
+        console.log('name:', event.target.name)
+        console.log('value:', event.target.checked)
+        setState({
+            ...checkboxState,
+            [event.target.name]: event.target.checked,
+        })
+        console.log('afterlistii', checklistObjects)
+        const error = dispatch(
+            DashboardActions.updateRegistrationChecklist(
+                event.slug,
+                checklistObjects,
+            ),
+        )
+        if (error) {
+            dispatch(SnackbarActions.error('Oops, something went wrong...'))
+        } else {
+            dispatch(SnackbarActions.success('Success!'))
+        }
+    }
 
-    const correctChecklistObjects =
-        hackathonEvent.eventType === 'online'
-            ? checklistObjectsOnline
-            : checklistObjectsOffline
+    const renderCheckListBlock = () => {
+        return (
+            <Grid item xs={6}>
+                <GradientBox color="theme_white" p={3}>
+                    <FormControl>
+                        <FormGroup>
+                            {checklistObjects.map(value => (
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={value.checked}
+                                            onChange={handleChange}
+                                            name={value.title}
+                                        />
+                                    }
+                                    label={value.title}
+                                />
+                            ))}
+                        </FormGroup>
+                    </FormControl>
+                </GradientBox>
+            </Grid>
+        )
+    }
 
     return (
-        <div className={classes.root}>
-            <FormControl component="fieldset" className={classes.formControl}>
-                <FormLabel component="legend">Event checklist</FormLabel>
-                <FormGroup>
-                    {correctChecklistObjects.map(value => (
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={value.state}
-                                    onChange={handleChange}
-                                    name={value.name}
-                                />
-                            }
-                            label={value.label}
-                        />
-                    ))}
-                </FormGroup>
-            </FormControl>
-        </div>
+        <>
+            <PageHeader
+                heading="Checklist"
+                subheading="Tick the boxes you have successfully completed"
+            />
+            {renderCheckListBlock()}
+        </>
     )
 }

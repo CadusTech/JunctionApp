@@ -173,6 +173,14 @@ RegistrationsService.updateTravelGrantDetails = (idToken, slug, data) => {
     )
 }
 
+RegistrationsService.updateChecklist = (idToken, slug, data) => {
+    return _axios.patch(
+        `${BASE_ROUTE}/${slug}/checklist`,
+        { data },
+        config(idToken),
+    )
+}
+
 RegistrationsService.adminUpdateTravelGrantDetails = (
     idToken,
     slug,
