@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import FormControl from '@material-ui/core/FormControl'
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
@@ -11,43 +11,44 @@ import { Grid } from '@material-ui/core'
 import * as DashboardSelectors from 'redux/dashboard/selectors'
 import * as DashboardActions from 'redux/dashboard/actions'
 import * as SnackbarActions from 'redux/snackbar/actions'
+import { componentsToColor } from 'pdf-lib'
+import { ContactSupportOutlined } from '@material-ui/icons'
 
 export default () => {
     const dispatch = useDispatch()
+    const registration_event = useSelector(DashboardSelectors.event)
     const registration = useSelector(DashboardSelectors.registration)
-    const checklistObjects = []
+    const loaded = useRef(false)
 
-    const [checkboxState, setState] = React.useState({
-        firstCheckboks: registration.checklist.items[0].checked,
-        secondCheckboks: registration.checklist.items[1].checked,
-        thirdCheckboks: registration.checklist.items[2].checked,
-        fourthCheckboks: registration.checklist.items[3].checked,
-    })
+    const [checkboxState, setCheckboxState] = React.useState({})
 
-    const initializeChecklistObjects = () => {
-        registration.checklist.items.forEach((item, index) => {
-            checklistObjects.push({
-                title: item.title,
-                checked: Object.values(checkboxState)[index],
+    useEffect(() => {
+        if (!loaded.current) {
+            const copy = checkboxState
+            registration.checklist.items.forEach((item, index) => {
+                copy['checkbox' + (index + 1)] = item.checked
+                setCheckboxState(copy)
             })
-        })
-    }
+            loaded.current = true
+        }
+    }, [checkboxState, registration.checklist.items])
 
-    initializeChecklistObjects()
-    console.log('listii: ', checklistObjects)
-
-    const handleChange = event => {
-        console.log('name:', event.target.name)
-        console.log('value:', event.target.checked)
-        setState({
+    const handleChange = (event, index) => {
+        setCheckboxState({
             ...checkboxState,
             [event.target.name]: event.target.checked,
         })
-        console.log('afterlistii', checklistObjects)
+        const data = {
+            name: 'checkbox' + (index + 1),
+            title: registration.checklist.items[index].title,
+            checked: event.target.checked,
+        }
+        console.log('this is data: ', data)
         const error = dispatch(
             DashboardActions.updateRegistrationChecklist(
-                event.slug,
-                checklistObjects,
+                registration_event.slug,
+                data,
+                index,
             ),
         )
         if (error) {
@@ -63,16 +64,22 @@ export default () => {
                 <GradientBox color="theme_white" p={3}>
                     <FormControl>
                         <FormGroup>
-                            {checklistObjects.map(value => (
+                            {Object.keys(checkboxState).map((value, index) => (
                                 <FormControlLabel
                                     control={
                                         <Checkbox
-                                            checked={value.checked}
-                                            onChange={handleChange}
-                                            name={value.title}
+                                            checked={checkboxState[value]}
+                                            onChange={e =>
+                                                handleChange(e, index)
+                                            }
+                                            name={value}
                                         />
                                     }
-                                    label={value.title}
+                                    key={index}
+                                    label={
+                                        registration.checklist.items[index]
+                                            .title
+                                    }
                                 />
                             ))}
                         </FormGroup>

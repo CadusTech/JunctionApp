@@ -171,9 +171,9 @@ controller.setTravelGrantDetailsForRegistration = async (
     return registration.save()
 }
 
-controller.updateChecklist = (registrationId, event, data) => {
+controller.updateChecklist = (registrationId, event, data, index) => {
     return Registration.findById(registrationId).then(registration => {
-        registration.checklist.items = data.items
+        registration.checklist.items[index] = data.items
         return registration.save()
     })
 }

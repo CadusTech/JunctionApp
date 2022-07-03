@@ -11,6 +11,9 @@ const mongoose = require('mongoose')
 const ChecklistSchema = new mongoose.Schema({
     items: [
         {
+            name: {
+                type: String,
+            },
             title: {
                 type: String,
             },
@@ -24,6 +27,9 @@ const ChecklistSchema = new mongoose.Schema({
 const ChecklistItemType = new GraphQLObjectType({
     name: 'ChecklistItem',
     fields: {
+        name: {
+            type: GraphQLNonNull(GraphQLString),
+        },
         title: {
             type: GraphQLNonNull(GraphQLString),
         },
@@ -38,6 +44,9 @@ const ChecklistItemInput = new GraphQLInputObjectType({
     fields: {
         _id: {
             type: GraphQLString,
+        },
+        name: {
+            type: GraphQLNonNull(GraphQLString),
         },
         title: {
             type: GraphQLNonNull(GraphQLString),

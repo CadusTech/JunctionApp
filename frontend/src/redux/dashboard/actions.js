@@ -34,7 +34,7 @@ export const updateRegistration = slug => (dispatch, getState) => {
 }
 
 export const updateRegistrationChecklist =
-    (slug, data) => async (dispatch, getState) => {
+    (slug, data, index) => async (dispatch, getState) => {
         const idToken = AuthSelectors.getIdToken(getState())
 
         try {
@@ -42,6 +42,7 @@ export const updateRegistrationChecklist =
                 idToken,
                 slug,
                 data,
+                index,
             )
 
             dispatch({
