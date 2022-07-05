@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import FormControl from '@material-ui/core/FormControl'
 import FormGroup from '@material-ui/core/FormGroup'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
@@ -11,8 +11,6 @@ import { Grid } from '@material-ui/core'
 import * as DashboardSelectors from 'redux/dashboard/selectors'
 import * as DashboardActions from 'redux/dashboard/actions'
 import * as SnackbarActions from 'redux/snackbar/actions'
-import { componentsToColor } from 'pdf-lib'
-import { ContactSupportOutlined } from '@material-ui/icons'
 
 export default () => {
     const dispatch = useDispatch()
@@ -39,16 +37,18 @@ export default () => {
             [event.target.name]: event.target.checked,
         })
         const data = {
-            name: 'checkbox' + (index + 1),
-            title: registration.checklist.items[index].title,
-            checked: event.target.checked,
+            checklistItem: {
+                name: 'checkbox' + (index + 1),
+                title: registration.checklist.items[index].title,
+                checked: event.target.checked,
+            },
+            itemIndex: index,
         }
         console.log('this is data: ', data)
         const error = dispatch(
             DashboardActions.updateRegistrationChecklist(
                 registration_event.slug,
                 data,
-                index,
             ),
         )
         if (error) {
