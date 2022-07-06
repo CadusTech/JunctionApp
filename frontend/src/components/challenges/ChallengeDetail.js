@@ -17,7 +17,6 @@ const ChallengeDetail = ({
     link,
     isFocused,
 }) => {
-    console.info('focused: ', isFocused)
     return (
         <>
             <Box p={2}>
