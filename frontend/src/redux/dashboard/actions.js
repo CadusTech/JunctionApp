@@ -34,13 +34,14 @@ export const updateRegistration = slug => (dispatch, getState) => {
 }
 
 export const updateRegistrationChecklist =
-    (slug, data) => async (dispatch, getState) => {
+    (slug, registrationId, data) => async (dispatch, getState) => {
         const idToken = AuthSelectors.getIdToken(getState())
 
         try {
             const registration = await RegistrationsService.updateChecklist(
                 idToken,
                 slug,
+                registrationId,
                 data,
             )
 

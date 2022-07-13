@@ -112,7 +112,6 @@ const updateTravelGrantDetails = asyncHandler(async (req, res) => {
 const updateChecklist = asyncHandler(async (req, res) => {
     const registration = await RegistrationController.updateChecklist(
         req.body.registrationId,
-        req.event,
         req.body.data,
     )
     return res.status(200).json(registration)

@@ -11,6 +11,7 @@ const updateAllowedPlugin = require('../../common/plugins/updateAllowed')
 const WebhookService = require('../../common/services/webhook')
 const EmailTaskController = require('../email-task/controller')
 const UserProfileController = require('../user-profile/controller')
+const { checklistItemsPhysical } = require('./checklists')
 
 const RegistrationSchema = new mongoose.Schema({
     event: {
@@ -50,7 +51,7 @@ const RegistrationSchema = new mongoose.Schema({
     checklist: {
         type: ChecklistSchema.mongoose,
         default: {
-            items: [],
+            items: checklistItemsPhysical(),
         },
     },
     answers: {

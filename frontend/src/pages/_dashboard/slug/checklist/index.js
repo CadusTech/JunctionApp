@@ -16,22 +16,19 @@ export default () => {
     const dispatch = useDispatch()
     const registration_event = useSelector(DashboardSelectors.event)
     const registration = useSelector(DashboardSelectors.registration)
-    const loaded = useRef(false)
 
     const [checkboxState, setCheckboxState] = React.useState({})
 
     useEffect(() => {
-        if (!loaded.current) {
-            const copy = checkboxState
-            registration.checklist.items.forEach((item, index) => {
-                copy['checkbox' + (index + 1)] = item.checked
-                setCheckboxState(copy)
-            })
-            loaded.current = true
-        }
-    }, [checkboxState, registration.checklist.items])
+        const copy = { ...checkboxState }
+        registration.checklist.items.forEach((item, index) => {
+            copy['checkbox' + (index + 1)] = item.checked
+            setCheckboxState(copy)
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
-    const handleChange = (event, index) => {
+    const handleChange = async (event, index) => {
         setCheckboxState({
             ...checkboxState,
             [event.target.name]: event.target.checked,
@@ -45,22 +42,25 @@ export default () => {
             itemIndex: index,
         }
         console.log('this is data: ', data)
-        const error = dispatch(
+        console.log(registration)
+        dispatch(
             DashboardActions.updateRegistrationChecklist(
                 registration_event.slug,
+                registration._id,
                 data,
             ),
         )
-        if (error) {
-            dispatch(SnackbarActions.error('Oops, something went wrong...'))
-        } else {
-            dispatch(SnackbarActions.success('Success!'))
-        }
+            .then(success => {
+                dispatch(SnackbarActions.success('Success!'))
+            })
+            .catch(error => {
+                dispatch(SnackbarActions.error('Oops, something went wrong...'))
+            })
     }
 
     const renderCheckListBlock = () => {
         return (
-            <Grid item xs={6}>
+            <Grid item>
                 <GradientBox color="theme_white" p={3}>
                     <FormControl>
                         <FormGroup>
@@ -68,6 +68,7 @@ export default () => {
                                 <FormControlLabel
                                     control={
                                         <Checkbox
+                                            color="primary"
                                             checked={checkboxState[value]}
                                             onChange={e =>
                                                 handleChange(e, index)
