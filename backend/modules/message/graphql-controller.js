@@ -1,10 +1,12 @@
 const { Auth } = require('@hackjunction/shared')
 const { v4: uuid } = require('uuid')
+const { PubSub } = require('graphql-subscriptions')
 const PermissionUtils = require('../../utils/permissions')
 const { Message } = require('./model')
 
 class MessageController {
     constructor(requestingUser, overrideChecks) {
+        this.pubsub = new PubSub()
         this.requestingUser = requestingUser
         this.overrideChecks = overrideChecks
         this.isAdmin =
@@ -39,6 +41,10 @@ class MessageController {
             recipients,
             sender: requesterId,
             sentAt: new Date(),
+        })
+
+        this.pubsub.publish('MESSAGE_SENT', {
+            sentMessage: newMessage,
         })
 
         return this._cleanOne(newMessage.save())
@@ -77,6 +83,11 @@ class MessageController {
         })
 
         return this._clean(Promise.all(messages.map(m => m.save())))
+    }
+
+    async subscribe() {
+        console.info('SUBSCRIPTION RECIEVED')
+        return this.pubsub.asyncIterator('MESSAGE_SENT')
     }
 
     async _clean(promise) {

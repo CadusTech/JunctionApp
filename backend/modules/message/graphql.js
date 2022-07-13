@@ -88,6 +88,15 @@ const MutationType = new GraphQLObjectType({
     },
 })
 
+const SubscriptionType = new GraphQLObjectType({
+    name: 'Subscription',
+    fields: {
+        newMessages: {
+            type: MessageType,
+        },
+    },
+})
+
 const Resolvers = {
     Query: {
         messages: async (parent, args, context) => {
@@ -117,11 +126,19 @@ const Resolvers = {
             return context.controller('Message').readMany(args.ids, userId)
         },
     },
+    Subscription: {
+        newMessages: {
+            subscribe: (parent, args, context) => {
+                return context.controller('Message').subscribe()
+            },
+        },
+    },
 }
 
 module.exports = {
     QueryType,
     MutationType,
+    SubscriptionType,
     Resolvers,
     Types: {
         MessageType,
