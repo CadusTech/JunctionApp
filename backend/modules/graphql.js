@@ -46,12 +46,10 @@ module.exports = app => {
     const serverCleanup = useServer(
         {
             schema,
-            context: () => {
+            context: ctx => {
                 // You can define your own function for setting a dynamic context
                 // or provide a static value
-                return {
-                    controller: buildGetController(),
-                }
+                console.info(ctx)
             },
         },
         wsServer,

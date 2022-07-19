@@ -16,22 +16,6 @@ const httpLink = createHttpLink({
     uri: '/graphql',
 })
 
-const wsLink = new GraphQLWsLink(
-    createClient({ url: 'ws://localhost:2222/graphql' }),
-)
-
-const splitLink = split(
-    ({ query }) => {
-        const definition = getMainDefinition(query)
-        return (
-            definition.kind === 'OperationDefinition' &&
-            definition.operation === 'subscription'
-        )
-    },
-    wsLink,
-    httpLink,
-)
-
 const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors)
         graphQLErrors.forEach(({ message, locations, path }) =>
@@ -44,6 +28,25 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 })
 
 export default idToken => {
+    const wsLink = new GraphQLWsLink(
+        createClient({
+            url: 'ws://localhost:2222/graphql',
+            connectionParams: { authToken: idToken },
+        }),
+    )
+
+    const splitLink = split(
+        ({ query }) => {
+            const definition = getMainDefinition(query)
+            return (
+                definition.kind === 'OperationDefinition' &&
+                definition.operation === 'subscription'
+            )
+        },
+        wsLink,
+        httpLink,
+    )
+
     const authLink = setContext((_, { headers }) => {
         return {
             headers: {

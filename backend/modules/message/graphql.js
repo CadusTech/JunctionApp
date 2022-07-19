@@ -1,4 +1,5 @@
 const { GraphQLBoolean } = require('graphql')
+const { RedisPubSub } = require('graphql-redis-subscriptions')
 const {
     GraphQLString,
     GraphQLObjectType,
@@ -8,6 +9,8 @@ const {
     GraphQLInputObjectType,
 } = require('graphql')
 const { GraphQLDate } = require('graphql-iso-date')
+
+const pubsub = new RedisPubSub()
 
 const MessageInput = new GraphQLInputObjectType({
     name: 'MessageInput',
@@ -91,7 +94,7 @@ const MutationType = new GraphQLObjectType({
 const SubscriptionType = new GraphQLObjectType({
     name: 'Subscription',
     fields: {
-        newMessages: {
+        newMessage: {
             type: MessageType,
         },
     },
@@ -111,6 +114,10 @@ const Resolvers = {
             const userId = context.req.user ? context.req.user.sub : null
             if (!userId) return null
 
+            pubsub.publish('MESSAGE_SENT', {
+                newMessage: args.message,
+            })
+
             return context.controller('Message').send(args.message, userId)
         },
         readMessage: async (parent, args, context) => {
@@ -127,9 +134,9 @@ const Resolvers = {
         },
     },
     Subscription: {
-        newMessages: {
-            subscribe: (parent, args, context) => {
-                return context.controller('Message').subscribe()
+        newMessage: {
+            subscribe: () => {
+                return pubsub.asyncIterator('MESSAGE_SENT')
             },
         },
     },
