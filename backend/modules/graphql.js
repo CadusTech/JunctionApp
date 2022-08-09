@@ -14,6 +14,7 @@ const Organization = require('./organization/graphql')
 const Message = require('./message/graphql')
 
 const buildGetController = require('./graphql-controller-factory')
+const { verifyWsToken } = require('../misc/jwt')
 
 module.exports = app => {
     const modules = [UserProfile, Registration, Event, Organization, Message]
@@ -46,10 +47,18 @@ module.exports = app => {
     const serverCleanup = useServer(
         {
             schema,
+            onConnect: async ctx => {
+                const verified = await verifyWsToken(
+                    ctx.connectionParams.authToken,
+                )
+                // console.info(`got token ${JSON.stringify(user)}`)
+                ctx.tokenData = verified
+            },
             context: ctx => {
-                // You can define your own function for setting a dynamic context
-                // or provide a static value
-                console.info(ctx)
+                if (!ctx.tokenData) {
+                    return { user: null }
+                }
+                return { user: ctx.tokenData }
             },
         },
         wsServer,

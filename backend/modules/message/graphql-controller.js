@@ -1,6 +1,5 @@
 const { Auth } = require('@hackjunction/shared')
 const { v4: uuid } = require('uuid')
-const { RedisPubSub } = require('graphql-redis-subscriptions')
 const PermissionUtils = require('../../utils/permissions')
 const { Message } = require('./model')
 

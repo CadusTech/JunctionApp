@@ -1,4 +1,5 @@
 const { GraphQLBoolean } = require('graphql')
+const { withFilter } = require('graphql-subscriptions')
 const { RedisPubSub } = require('graphql-redis-subscriptions')
 const {
     GraphQLString,
@@ -135,9 +136,24 @@ const Resolvers = {
     },
     Subscription: {
         newMessage: {
-            subscribe: () => {
-                return pubsub.asyncIterator('MESSAGE_SENT')
-            },
+            subscribe: withFilter(
+                () => {
+                    return pubsub.asyncIterator('MESSAGE_SENT')
+                },
+                ({ newMessage }, _, { user }) => {
+                    // Check authentication from context
+                    const userId = user ? user.sub : null
+                    if (!userId) {
+                        return false
+                    }
+
+                    // Check that user is a recipient
+                    if (!newMessage.recipients.includes(userId)) {
+                        return false
+                    }
+                    return true
+                },
+            ),
         },
     },
 }
