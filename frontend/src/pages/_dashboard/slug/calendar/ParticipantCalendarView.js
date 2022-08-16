@@ -64,6 +64,7 @@ const useStyles = makeStyles(theme => ({
 
 export default ({ event, user }) => {
     const challenges = event.challenges
+    console.log('user:', user)
     const [challenge, setChallenge] = React.useState('')
     const [daysStartIndex, setDaysStartIndex] = useState(0)
     const [noOfDaysToShow, setNoOfDaysToShow] = useState(3)
