@@ -1,13 +1,15 @@
 const mongoose = require('mongoose')
 const Promise = require('bluebird')
-
-const EventController = require('../modules/event/controller')
+const { checklistItemsPhysical } = require('../modules/registration/checklists')
+const { checklistItemsOnline } = require('../modules/registration/checklists')
 
 module.exports = {
     index: 14,
     name: '14-add-checklist-to-registration',
     description: 'add checklist',
     run: async () => {
+        const physicalChecklist = checklistItemsPhysical()
+        const onlineChecklist = checklistItemsOnline()
         const nres = await mongoose.model('Registration').updateMany(
             { checklist: { $exists: false } },
             {
@@ -18,39 +20,43 @@ module.exports = {
                 },
             },
         )
-        const bres = await mongoose.model('Registration').updateMany(
-            {
-                checklistItem: null,
-            },
+
+        const mres = await mongoose.model('Registration').updateMany(
+            { checklist: null },
             {
                 $set: {
                     checklist: {
-                        items: [
-                            {
-                                name: 'checkbox1',
-                                title: '1st checkboks',
-                                checked: false,
-                            },
-                            {
-                                name: 'checkbox2',
-                                title: '2nd checkboks',
-                                checked: false,
-                            },
-                            {
-                                name: 'checkbox3,',
-                                title: '3rd checkbox',
-                                checked: false,
-                            },
-                            {
-                                name: 'checkbox4',
-                                title: '4th checkbox',
-                                checked: false,
-                            },
-                        ],
+                        items: [],
                     },
                 },
             },
         )
+
+        const bres = await mongoose
+            .model('Registration')
+            .find({
+                'checklist.items': {
+                    $eq: [],
+                },
+            })
+            .populate('event')
+            .then(registrations => {
+                const promises = registrations.map(registration => {
+                    const variable = registration.event
+                        ? registration.event.eventType
+                        : 'noEventType'
+
+                    if (variable === 'physical') {
+                        registration.checklist.items = physicalChecklist
+                    } else {
+                        registration.checklist.items = onlineChecklist
+                    }
+                    return registration.save()
+                })
+
+                return Promise.all(promises)
+            })
+
         console.info('Done with registration checklist', nres.n, nres.nModified)
         return Promise.resolve()
     },

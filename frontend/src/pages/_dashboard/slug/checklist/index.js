@@ -6,7 +6,7 @@ import Checkbox from '@material-ui/core/Checkbox'
 import { useDispatch, useSelector } from 'react-redux'
 import PageHeader from 'components/generic/PageHeader'
 import GradientBox from 'components/generic/GradientBox'
-import { Grid } from '@material-ui/core'
+import { Grid, Typography } from '@material-ui/core'
 
 import * as DashboardSelectors from 'redux/dashboard/selectors'
 import * as DashboardActions from 'redux/dashboard/actions'
@@ -49,13 +49,9 @@ export default () => {
                 registration._id,
                 data,
             ),
-        )
-            .then(success => {
-                dispatch(SnackbarActions.success('Success!'))
-            })
-            .catch(error => {
-                dispatch(SnackbarActions.error('Oops, something went wrong...'))
-            })
+        ).catch(error => {
+            dispatch(SnackbarActions.error('Oops, something went wrong...'))
+        })
     }
 
     const renderCheckListBlock = () => {
@@ -78,8 +74,19 @@ export default () => {
                                     }
                                     key={index}
                                     label={
-                                        registration.checklist.items[index]
-                                            .title
+                                        <Typography
+                                            style={
+                                                checkboxState[value]
+                                                    ? { color: 'grey' }
+                                                    : {}
+                                            }
+                                        >
+                                            {
+                                                registration.checklist.items[
+                                                    index
+                                                ].title
+                                            }
+                                        </Typography>
                                     }
                                 />
                             ))}
@@ -94,7 +101,7 @@ export default () => {
         <>
             <PageHeader
                 heading="Checklist"
-                subheading="Tick the boxes you have successfully completed"
+                subheading="Tick the tasks you have successfully completed"
             />
             {renderCheckListBlock()}
         </>
