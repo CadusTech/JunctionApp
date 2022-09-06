@@ -4,23 +4,49 @@ import { useQuery, useSubscription, useMutation } from '@apollo/client'
 import PageWrapper from 'components/layouts/PageWrapper'
 import { MY_MESSAGES_QUERY } from 'graphql/queries/messages'
 import { MY_MESSAGES_SUBSCRIPTION } from 'graphql/subscriptions/messages'
+import { SEND_MESSAGE_MUTATION } from 'graphql/mutations/messageOps'
 import { faOldRepublic } from '@fortawesome/free-brands-svg-icons'
+import { TextField } from '@material-ui/core'
+import { Formik } from 'formik'
+import schema from '@hackjunction/shared/schemas/validation/messageSchema'
+import { fieldNameFromStoreName } from '@apollo/client/cache'
+import { Button } from 'antd'
+import { useSelector } from 'react-redux'
+import { userProfile } from 'redux/user/selectors'
 
 /**
  * Functioncomponent that renders a chat
  * window for a given recipient id list
  */
-export function Chat({ recipients }) {
+export function Chat({ recipients = [] }) {
+    const { userId } = useSelector(userProfile)
     const [messages, setMessages] = useState([])
-    const { data, loading, error } = useQuery(MY_MESSAGES_QUERY, {
+    const {
+        data,
+        loading: queryLoading,
+        error: queryError,
+    } = useQuery(MY_MESSAGES_QUERY, {
         variables: { recipients },
     })
     const { data: newMessage, loading: subscriptionLoading } = useSubscription(
         MY_MESSAGES_SUBSCRIPTION,
     )
+    const [sendMessage, { loading: mutationLoading, error: mutationError }] =
+        useMutation(SEND_MESSAGE_MUTATION)
+
+    const onSubmit = values => {
+        console.info(userId)
+        sendMessage({
+            variables: {
+                input: {
+                    recipients: [...recipients, userId],
+                    content: values.content,
+                },
+            },
+        })
+    }
 
     useEffect(() => {
-        let allMessages = []
         if (data) {
             setMessages(old => {
                 const newArray = [...old, ...data.messages]
@@ -42,21 +68,36 @@ export function Chat({ recipients }) {
     }, [data, setMessages, newMessage])
 
     return (
-        <PageWrapper loading={loading}>
+        <PageWrapper loading={queryLoading || mutationLoading}>
             <div>
                 {messages.length > 0 &&
-                    messages
-                        /*  */
-                        .map(m => {
-                            return (
-                                <div key={m.id}>
-                                    {m.sender}, {m.content}, {m.sentAt}
-                                </div>
-                            )
-                        })}
-                <button onClick={() => console.info(messages)}>wahoo</button>
+                    messages.map(m => {
+                        return (
+                            <div key={m.id}>
+                                {m.sender}, {m.content}, {m.sentAt}
+                            </div>
+                        )
+                    })}
             </div>
-            <div>{error && JSON.stringify(error)}</div>
+            <div>
+                <Formik
+                    initialValues={{ content: '' }}
+                    onSubmit={onSubmit}
+                    validationSchema={schema}
+                >
+                    {({ values, handleChange, handleSubmit }) => (
+                        <div>
+                            <TextField
+                                name="content"
+                                value={values.content}
+                                onChange={handleChange}
+                            />
+                            <Button onClick={() => handleSubmit()}>Send</Button>
+                        </div>
+                    )}
+                </Formik>
+            </div>
+            <div>{queryError && JSON.stringify(queryError)}</div>
         </PageWrapper>
     )
 }
