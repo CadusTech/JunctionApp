@@ -116,7 +116,11 @@ const Resolvers = {
             if (!userId) return null
 
             pubsub.publish('MESSAGE_SENT', {
-                newMessage: args.message,
+                newMessage: {
+                    ...args.message,
+                    sentAt: new Date(),
+                    sender: userId,
+                },
             })
 
             return context.controller('Message').send(args.message, userId)
