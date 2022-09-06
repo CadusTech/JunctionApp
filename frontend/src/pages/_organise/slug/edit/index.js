@@ -22,14 +22,10 @@ import QuestionsTab from './questions'
 import SubmissionFormTab from './submission'
 import TimelineTab from './timeline'
 import OtherTab from './other'
-import { useMutation, useSubscription } from '@apollo/client'
+import { useMutation } from '@apollo/client'
 import { UPDATE_EVENT } from 'graphql/mutations/eventOps'
-import { MY_MESSAGES_SUBSCRIPTION } from 'graphql/subscriptions/messages'
 
 export default () => {
-    const { data, loading: messagesLoading } = useSubscription(
-        MY_MESSAGES_SUBSCRIPTION,
-    )
     const dispatch = useDispatch()
     const [saveChanges, saveResult] = useMutation(UPDATE_EVENT, {
         onError: err => {
@@ -83,7 +79,6 @@ export default () => {
                 heading="Edit event"
                 subheading="Configure event information, schedule and other settings"
             />
-            {!messagesLoading && <>yahooo</>}
             <Formik
                 initialValues={
                     saveResult.data ? saveResult.data.updateEvent : event

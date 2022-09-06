@@ -12,6 +12,7 @@ import AssignmentOutlinedIcon from '@material-ui/icons/AssignmentOutlined'
 import StarRateIcon from '@material-ui/icons/StarRate'
 import HowToVoteIcon from '@material-ui/icons/HowToVote'
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted'
+import { QuestionAnswerSharp } from '@material-ui/icons'
 
 import SidebarLayout from 'components/layouts/SidebarLayout'
 import Image from 'components/generic/Image'
@@ -35,6 +36,7 @@ import * as OrganiserActions from 'redux/organiser/actions'
 
 import { useTranslation } from 'react-i18next'
 import { CheckBox } from '@material-ui/icons'
+import { Chat } from 'components/messaging/chat'
 
 const useStyles = makeStyles(theme => ({
     sidebarTop: {
@@ -204,6 +206,14 @@ export default () => {
                         hidden: !shownPages.hackerPack,
                         label: 'Checklist',
                         component: ChecklistPage,
+                    },
+                    {
+                        key: 'chat',
+                        path: '/chat',
+                        exact: true,
+                        icon: <QuestionAnswerSharp />,
+                        label: 'Chat',
+                        component: Chat,
                     },
                 ]}
             />
