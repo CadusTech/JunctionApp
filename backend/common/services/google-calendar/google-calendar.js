@@ -34,6 +34,7 @@ function authorize(credentials, callback, callbackParameter = null) {
     })
 }
 
+>>>>>>> separate scripts for google calendar authentication
 const insertEvent = (auth, eventInfo) => {
     const calendar = google.calendar({ version: 'v3', auth })
     calendar.events.insert(
