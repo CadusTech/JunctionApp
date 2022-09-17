@@ -38,12 +38,9 @@ import { useTranslation } from 'react-i18next'
 import { CheckBox } from '@material-ui/icons'
 import { Alerts } from 'components/messaging/alerts'
 import Badge from '@material-ui/core/Badge'
-import { useLazyQuery, useQuery, useSubscription } from '@apollo/client'
+import { useLazyQuery, useSubscription } from '@apollo/client'
 import { ALERTS_QUERY } from 'graphql/queries/alert'
-import {
-    NEW_ALERTS_BY_SLUG_SUBSCRIPTION,
-    NEW_ALERTS_SUBSCRIPTION,
-} from 'graphql/subscriptions/alert'
+import { NEW_ALERTS_SUBSCRIPTION } from 'graphql/subscriptions/alert'
 // TODO: Chat UI still a work in progress
 // import { Chat } from 'components/messaging/chat'
 
@@ -258,14 +255,6 @@ export default () => {
                         hidden: !shownPages.hackerPack,
                         label: 'Checklist',
                         component: ChecklistPage,
-                    },
-                    {
-                        key: 'alerts',
-                        path: '/alerts',
-                        exact: true,
-                        icon: <QuestionAnswerSharp />,
-                        label: 'Alerts',
-                        component: Alerts,
                     },
                     // TODO: Chat UI still a work in progress
                     /*
