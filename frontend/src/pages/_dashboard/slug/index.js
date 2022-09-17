@@ -36,7 +36,8 @@ import * as OrganiserActions from 'redux/organiser/actions'
 
 import { useTranslation } from 'react-i18next'
 import { CheckBox } from '@material-ui/icons'
-import { Chat } from 'components/messaging/chat'
+// TODO: Chat UI still a work in progress
+// import { Chat } from 'components/messaging/chat'
 
 const useStyles = makeStyles(theme => ({
     sidebarTop: {
@@ -207,6 +208,8 @@ export default () => {
                         label: 'Checklist',
                         component: ChecklistPage,
                     },
+                    // TODO: Chat UI still a work in progress
+                    /*
                     {
                         key: 'chat',
                         path: '/chat',
@@ -214,7 +217,7 @@ export default () => {
                         icon: <QuestionAnswerSharp />,
                         label: 'Chat',
                         component: Chat,
-                    },
+                    }, */
                 ]}
             />
         </PageWrapper>
