@@ -76,6 +76,14 @@ export default () => {
     const lockedPages = useSelector(DashboardSelectors.lockedPages)
     const shownPages = useSelector(DashboardSelectors.shownPages)
     const { slug } = match.params
+
+    // Set up browser notifications
+    useEffect(() => {
+        if ('Notification' in window && Notification.permission !== 'granted') {
+            Notification.requestPermission()
+        }
+    }, [])
+
     /** Update when slug changes */
     useEffect(() => {
         dispatch(DashboardActions.updateEvent(slug))
@@ -115,6 +123,14 @@ export default () => {
             })
         }
         if (newAlert) {
+            if (
+                'Notification' in window &&
+                Notification.permission === 'granted'
+            ) {
+                new Notification('Announcement', {
+                    body: newAlert.newAlert.content,
+                })
+            }
             setAlertCount(alertCount + 1)
             setAlerts(old => {
                 const newArray = [...old, newAlert.newAlert]
@@ -166,7 +182,10 @@ export default () => {
                             </Badge>
                         ),
                         label: t('Dashboard_'),
-                        component: () => DefaultPage({ alerts }),
+                        component: () => {
+                            setAlertCount(0)
+                            return DefaultPage({ alerts })
+                        },
                     },
                     {
                         key: 'finals',

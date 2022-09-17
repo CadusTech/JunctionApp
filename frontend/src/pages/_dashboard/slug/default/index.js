@@ -68,6 +68,7 @@ export default ({ alerts }) => {
                 <div
                     style={{
                         height: '0 0 100%',
+                        width: '100%',
                         display: 'flex',
                         justifyContent: 'space-between',
                         padding: '2em',
