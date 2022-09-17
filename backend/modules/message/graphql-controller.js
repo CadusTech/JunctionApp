@@ -5,7 +5,6 @@ const { Message } = require('./model')
 
 class MessageController {
     constructor(requestingUser, overrideChecks) {
-        // this.pubsub = new RedisPubSub()
         this.requestingUser = requestingUser
         this.overrideChecks = overrideChecks
         this.isAdmin =
@@ -79,11 +78,6 @@ class MessageController {
 
         return this._clean(Promise.all(messages.map(m => m.save())))
     }
-
-    /* async subscribe() {
-        console.info('SUBSCRIPTION RECIEVED')
-        return this.pubsub.asyncIterator('MESSAGE_SENT')
-    } */
 
     async _clean(promise) {
         const result = await promise

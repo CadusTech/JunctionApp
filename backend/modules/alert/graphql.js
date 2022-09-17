@@ -9,7 +9,7 @@ const {
     GraphQLInputObjectType,
 } = require('graphql')
 const { GraphQLDate } = require('graphql-iso-date')
-const { RegistrationController } = require('../registration/controller')
+const RegistrationController = require('../registration/controller')
 const Event = require('../event/model')
 
 const pubsub = new RedisPubSub()
@@ -53,8 +53,8 @@ const QueryType = new GraphQLObjectType({
         alerts: {
             type: GraphQLList(AlertType),
             args: {
-                eventIds: {
-                    type: GraphQLList(GraphQLString),
+                eventId: {
+                    type: GraphQLNonNull(GraphQLString),
                 },
             },
         },
@@ -80,7 +80,10 @@ const SubscriptionType = new GraphQLObjectType({
             type: AlertType,
             args: {
                 eventId: {
-                    type: GraphQLNonNull(GraphQLString),
+                    type: GraphQLString,
+                },
+                slug: {
+                    type: GraphQLString,
                 },
             },
         },
@@ -110,7 +113,7 @@ const Resolvers = {
             }
 
             pubsub.publish('ALERT_SENT', {
-                alert: {
+                newAlert: {
                     ...args.alert,
                     sentAt: new Date(),
                     sender: userId,
@@ -126,19 +129,18 @@ const Resolvers = {
                 () => {
                     return pubsub.asyncIterator('ALERT_SENT')
                 },
-                async (_, { eventId }, { user }) => {
+                async (_, { eventId, slug }, { user }) => {
                     // Check authentication from context
                     const userId = user ? user.sub : null
                     if (!userId) {
                         return false
                     }
 
+                    const id = eventId || (await Event.findOne({ slug }))._id
+
                     // Find a registration for the user and event
                     const registration =
-                        await RegistrationController.getRegistration(
-                            userId,
-                            eventId,
-                        )
+                        await RegistrationController.getRegistration(userId, id)
                     if (!registration) {
                         return false
                     }
