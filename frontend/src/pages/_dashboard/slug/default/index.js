@@ -19,7 +19,7 @@ import EventOverBlock from './Blocks/EventOverBlock'
 import SocialMediaBlock from './Blocks/SocialMediaBlock'
 import EventTimeline from 'pages/_events/slug/default/EventTimeline'
 import TimeLineBlock from './Blocks/TimeLineBlock'
-import { Alerts } from 'components/messaging/alerts'
+import AlertBlock from './Blocks/AlertBlock'
 
 export default ({ alerts }) => {
     return (
@@ -65,8 +65,17 @@ export default ({ alerts }) => {
             </Helmet>
             <Box mt={2} />
             <Grid container spacing={5}>
-                <TimeLineBlock />
-                <Alerts alerts={alerts} />
+                <div
+                    style={{
+                        height: '0 0 100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '2em',
+                    }}
+                >
+                    <TimeLineBlock />
+                    <AlertBlock alerts={alerts} />
+                </div>
                 <EventOverBlock />
                 <ReviewingPeriodBlock />
                 <RegistrationStatusBlock />
