@@ -50,7 +50,7 @@ const AlertType = new GraphQLObjectType({
 const QueryType = new GraphQLObjectType({
     name: 'Query',
     fields: {
-        Alerts: {
+        alerts: {
             type: GraphQLList(AlertType),
             args: {
                 eventIds: {
@@ -89,7 +89,7 @@ const SubscriptionType = new GraphQLObjectType({
 
 const Resolvers = {
     Query: {
-        Alerts: async (parent, args, context) => {
+        alerts: async (parent, args, context) => {
             const userId = context.req.user ? context.req.user.sub : null
             if (!userId) return null
 
