@@ -103,6 +103,7 @@ export default ({
         (booked && end.getTime() > new Date().getTime())
     const classes = useStyles({ booked, isOpenable })
 
+    console.log(hasFutureBooking)
     const openContent = () => (
         <>
             {booked ? (
@@ -145,6 +146,8 @@ export default ({
             )}
         </>
     )
+
+    const isOpenable = start.getTime() > new Date().getTime() || booked
 
     return (
         <div
