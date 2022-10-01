@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { divide } from 'lodash-es'
 import PageHeader from 'components/generic/PageHeader'
 import theme from 'material-ui-theme'
+import MeetingLocationSelection from './meetingLocationSelection'
 
 const useStyles = makeStyles(theme => ({
     formWrapper: {
@@ -78,6 +79,9 @@ export default ({ event, user }) => {
         to: event.endTime,
         challengeId: challenge,
     })
+    const [showLocationSelection, setShowLocationSelection] = useState(false)
+    const [meetingForLocationSelection, setMeetingForLocationSelection] =
+        useState(null)
 
     const startDate = new Date(event.startTime)
     const endDate = new Date(event.endTime)
@@ -116,7 +120,9 @@ export default ({ event, user }) => {
             setTimeout(() => {
                 setDays(eventDays)
                 setMeetingsLoaded(false)
-                dispatch(SnackbarActions.success('Meeting booked successfully'))
+                dispatch(
+                    SnackbarActions.success('Meeting cancelled successfully'),
+                )
             }, 500)
         },
     })
@@ -228,6 +234,10 @@ export default ({ event, user }) => {
                         cancelMeetingAction(meeting)
                     }}
                     hasFutureBooking={hasFutureBooking}
+                    showLocationSelection={() => {
+                        setMeetingForLocationSelection(meeting)
+                        setShowLocationSelection(true)
+                    }}
                 />
             ))
         ) : (
@@ -257,6 +267,17 @@ export default ({ event, user }) => {
 
     return (
         <>
+            {showLocationSelection && (
+                <MeetingLocationSelection
+                    bookAction={() => {
+                        bookMeetingAction(meetingForLocationSelection)
+                    }}
+                    close={() => {
+                        setMeetingForLocationSelection(null)
+                        setShowLocationSelection(false)
+                    }}
+                />
+            )}
             <PageHeader
                 heading="Meetings"
                 subheading="Book a meeting with Partners to learn more about their Challenge."

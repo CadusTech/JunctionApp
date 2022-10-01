@@ -83,9 +83,9 @@ export default ({
     endTime,
     booked,
     googleMeetLink,
-    bookAction,
     cancelAction,
     hasFutureBooking,
+    showLocationSelection,
 }) => {
     const classes = useStyles({ booked })
     const [open, setOpen] = useState(false)
@@ -126,7 +126,7 @@ export default ({
                     className={classes.actionButton}
                     variant="contained"
                     color="primary"
-                    onClick={bookAction}
+                    onClick={showLocationSelection}
                     disabled={hasFutureBooking}
                     tooltipText="You can only have one upcoming meeting at a time."
                 >
