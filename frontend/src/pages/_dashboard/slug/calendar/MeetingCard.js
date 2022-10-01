@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux'
 import theme from 'material-ui-theme'
 
 const useStyles = makeStyles(theme => ({
-    meetingCard: ({ booked }) => ({
+    meetingCard: ({ booked, isOpenable }) => ({
         width: '100%',
         borderRadius: '0.5em',
         padding: '0.75em',
@@ -19,9 +19,11 @@ const useStyles = makeStyles(theme => ({
         background: booked ? theme.palette.primary.main : '#d1ebdf',
         fontSize: '16px',
         cursor: 'pointer',
-        '&:hover': {
-            filter: 'brightness(1.1)',
-        },
+        '&:hover': isOpenable
+            ? {
+                  filter: 'brightness(1.1)',
+              }
+            : {},
     }),
     meetingTime: {
         display: 'flex',
@@ -30,14 +32,15 @@ const useStyles = makeStyles(theme => ({
         fontSize: '1.25em',
         margin: '0.5em 0',
     },
-    actionButton: ({ booked }) => ({
+    actionButton: {
         color: 'black',
         fontWeight: 'bold',
         borderRadius: '0.5em',
         width: 'fit-content',
         marginTop: '0.75em',
         fontSize: '0.875em',
-    }),
+        boxShadow: 'none',
+    },
     meetingInfo: {
         fontWeight: 'bold',
         display: 'flex',
@@ -93,15 +96,19 @@ export default ({
     bookAction,
     cancelAction,
     hasFutureBooking,
+    isOpen,
+    cardOnClick,
 }) => {
-    const classes = useStyles({ booked })
-    const [open, setOpen] = useState(false)
     const start = new Date(startTime)
     const end = new Date(endTime)
     const startMinutes = start.getMinutes()
     const endMinutes = end.getMinutes()
+    // Make the meeting card openable if the meeting is in the future or if it is booked and hasn't ended yet
+    const isOpenable =
+        start.getTime() > new Date().getTime() ||
+        (booked && end.getTime() > new Date().getTime())
+    const classes = useStyles({ booked, isOpenable })
 
-    console.log(hasFutureBooking)
     const openContent = () => (
         <>
             {booked ? (
@@ -143,16 +150,11 @@ export default ({
         </>
     )
 
-    // Make the meeting card openable if the meeting is in the future or if it is booked and hasn't ended yet
-    const isOpenable =
-        start.getTime() > new Date().getTime() ||
-        (booked && end.getTime() > new Date().getTime())
-
     return (
         <div
             className={classes.meetingCard}
             key={startTime}
-            onClick={() => (isOpenable ? setOpen(!open) : {})}
+            onClick={isOpenable ? cardOnClick : () => {}}
             style={!isOpenable ? { cursor: 'default' } : {}}
         >
             <p className={classes.meetingTime}>
@@ -164,7 +166,7 @@ export default ({
                     endMinutes === 0 ? '00' : endMinutes
                 }`}</span>
             </p>
-            {open && openContent()}
+            {isOpen && openContent()}
         </div>
     )
 }

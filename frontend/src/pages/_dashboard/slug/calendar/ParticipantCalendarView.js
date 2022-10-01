@@ -78,6 +78,7 @@ export default ({ event, user }) => {
         to: event.endTime,
         challengeId: challenge,
     })
+    const [openCard, setOpenCard] = useState('')
 
     const startDate = new Date(event.startTime)
     const endDate = new Date(event.endTime)
@@ -155,8 +156,6 @@ export default ({ event, user }) => {
             setDays(eventDays)
             setMeetingsLoaded(false)
             setChallenge(event.target.value)
-        } else {
-            console.log('nothing changed')
         }
     }
 
@@ -179,7 +178,6 @@ export default ({ event, user }) => {
 
     const sortMeetings = () => {
         if (!meetings || meetingsLoaded) return
-        console.log('meetings', meetings)
         const daysObj = { ...days }
         meetings.forEach(meeting => {
             const meetingStartDate = new Date(meeting.startTime)
@@ -195,12 +193,10 @@ export default ({ event, user }) => {
                 setHasFutureBooking(true)
             }
         })
-        console.log(daysObj)
         setDays(daysObj)
     }
 
     const cancelMeetingAction = meeting => {
-        console.log('cancel meeting:', meeting._id)
         cancelMeeting({
             variables: { meetingId: meeting._id },
         })
@@ -212,7 +208,14 @@ export default ({ event, user }) => {
         setMeetingsLoaded(true)
     }
 
-    const columnContent = (meetings, oneBooked) =>
+    const cardOnClick = id => {
+        if (openCard === id) {
+            setOpenCard('')
+        } else {
+            setOpenCard(id)
+        }
+    }
+    const columnContent = meetings =>
         meetings ? (
             meetings.map((meeting, index) => (
                 <MeetingCard
@@ -228,6 +231,10 @@ export default ({ event, user }) => {
                         cancelMeetingAction(meeting)
                     }}
                     hasFutureBooking={hasFutureBooking}
+                    isOpen={openCard === meeting._id}
+                    cardOnClick={() => {
+                        cardOnClick(meeting._id)
+                    }}
                 />
             ))
         ) : (
@@ -240,12 +247,10 @@ export default ({ event, user }) => {
     }
 
     const showNextDayRange = index => {
-        console.log('yeeee forward')
         setDaysStartIndex(daysStartIndex + noOfDaysToShow)
     }
 
     const showPrevDayRange = index => {
-        console.log('yeeee back')
         setDaysStartIndex(daysStartIndex - noOfDaysToShow)
     }
 
@@ -277,8 +282,10 @@ export default ({ event, user }) => {
                     label="Choose a challenge"
                     onChange={handleChange}
                 >
-                    {challenges.map(c => (
-                        <MenuItem value={c._id}>{c.name}</MenuItem>
+                    {challenges.map((c, index) => (
+                        <MenuItem key={index} value={c._id}>
+                            {c.name}
+                        </MenuItem>
                     ))}
                 </Select>
             </FormControl>
