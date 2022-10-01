@@ -16,13 +16,12 @@ const useStyles = makeStyles(theme => ({
         borderRadius: '0.5em',
         padding: '0.75em',
         marginBottom: '0.5em',
-        background: booked
-            ? theme.palette.primary.main
-            : theme.palette.grey[300],
+        background: booked ? theme.palette.primary.main : '#d1ebdf',
         fontSize: '16px',
-        //display: 'flex',
-        //flexDirection: 'column',
         cursor: 'pointer',
+        '&:hover': {
+            filter: 'brightness(1.1)',
+        },
     }),
     meetingTime: {
         display: 'flex',
@@ -32,11 +31,12 @@ const useStyles = makeStyles(theme => ({
         margin: '0.5em 0',
     },
     actionButton: ({ booked }) => ({
-        //background: booked ? 'red' : theme.palette.primary.main,
-        color: 'white',
+        color: 'black',
+        fontWeight: 'bold',
         borderRadius: '0.5em',
         width: 'fit-content',
         marginTop: '0.75em',
+        fontSize: '0.875em',
     }),
     meetingInfo: {
         fontWeight: 'bold',
@@ -50,10 +50,17 @@ const useStyles = makeStyles(theme => ({
     },
     joinButton: {
         borderRadius: '0.5em',
-        color: 'theme_primary',
+        fontSize: '0.875em',
+        color: 'black',
         width: 'fit-content',
         marginTop: '0.75em',
         marginRight: '0.75em',
+        background: '#d1ebdf',
+        borderColor: '#d1ebdf',
+        '&:hover': {
+            background: '#39967a',
+            borderColor: '#39967a',
+        },
     },
 }))
 
@@ -109,7 +116,7 @@ export default ({
                             variant="contained"
                             color="theme_orange"
                         >
-                            Join meeting
+                            JOIN MEETING
                         </Button>
                     </a>
                     <Button
@@ -118,7 +125,7 @@ export default ({
                         color="error"
                         onClick={cancelAction}
                     >
-                        Cancel
+                        CANCEL
                     </Button>
                 </div>
             ) : (
@@ -136,7 +143,10 @@ export default ({
         </>
     )
 
-    const isOpenable = start.getTime() > new Date().getTime() || booked
+    // Make the meeting card openable if the meeting is in the future or if it is booked and hasn't ended yet
+    const isOpenable =
+        start.getTime() > new Date().getTime() ||
+        (booked && end.getTime() > new Date().getTime())
 
     return (
         <div
