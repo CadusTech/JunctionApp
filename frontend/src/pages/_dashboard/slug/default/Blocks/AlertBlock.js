@@ -5,35 +5,7 @@ import * as DashboardSelectors from 'redux/dashboard/selectors'
 import GradientBox from 'components/generic/GradientBox'
 import { Alerts } from '../../../../../components/messaging/alerts'
 
-const testAlerts = [
-    {
-        content: 'Tässä vanhin ilmoitus',
-        sentAt: new Date(2022, 2, 10, 4, 26),
-    },
-    {
-        content: 'Tässä kaikista tokaks uusin ilmoitus',
-        sentAt: new Date(2022, 9, 15, 11, 26),
-    },
-    {
-        content:
-            'Kaikista uusin ilmotus wautsi wautsi jeejee muistakaaa nyt palauttaa se projekti tai ette voi voittaa voivoivoi cmoon hackatchon jeeee',
-        sentAt: new Date(2022, 9, 17, 2, 46),
-    },
-    {
-        content: 'Tässä kaikista kolmanneks uusin ilmoitus',
-        sentAt: new Date(2022, 4, 12, 2, 11),
-    },
-    {
-        content: 'Tässä kaikista kolmanneks uusin ilmoitus',
-        sentAt: new Date(2022, 4, 12, 2, 19),
-    },
-    {
-        content: 'Tässä kaikista kolmanneks uusin ilmoitus',
-        sentAt: new Date(2022, 4, 12, 2, 15),
-    },
-]
-
-export default ({ alerts = testAlerts }) => {
+export default ({ alerts = [] }) => {
     return (
         <Grid
             direction="column"
