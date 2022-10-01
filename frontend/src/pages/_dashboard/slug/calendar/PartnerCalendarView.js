@@ -37,8 +37,8 @@ export default ({ event }) => {
     const handleSubmit = () => {
         const meeting = {
             event: event._id,
-            startTime: '2023-03-13T14:00:00.000+00:00',
-            endTime: '2023-03-13T14:30:00.000+00:00',
+            startTime: '2023-11-06T14:00:00.000+00:00',
+            endTime: '2023-11-06T14:30:00.000+00:00',
             challenge,
         }
         createSlot({
