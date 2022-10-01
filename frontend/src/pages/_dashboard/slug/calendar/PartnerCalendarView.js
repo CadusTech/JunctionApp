@@ -31,7 +31,6 @@ export default ({ event }) => {
         },
     })
 
-    console.log(event)
     const challenge = event.challenges[0]._id
 
     const handleSubmit = () => {
