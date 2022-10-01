@@ -127,8 +127,8 @@ export default ({
                     variant="contained"
                     color="primary"
                     onClick={bookAction}
-                    disabled={true}
-                    tooltipText="kahvi on hyvää MUUTA TÄÄ ja sit kato et toi disabled state tulee sen future bookingin kautta"
+                    disabled={hasFutureBooking}
+                    tooltipText="You can only have one upcoming meeting at a time."
                 >
                     Book this meeting
                 </ButtonWithTooltip>

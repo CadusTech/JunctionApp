@@ -160,14 +160,19 @@ export default ({ event, user }) => {
         }
     }
 
+    var att = []
     const team = useSelector(DashboardSelectors.team)
-        ? user
-        : useSelector(DashboardSelectors.team)
+    if (team) {
+        att = [...team.members, team.owner]
+    } else {
+        att = user.userId
+    }
+
     const bookMeetingAction = meeting => {
         bookMeeting({
             variables: {
                 meetingId: meeting._id,
-                attendees: [...team.members, team.owner],
+                attendees: att,
             },
         })
     }
@@ -199,6 +204,7 @@ export default ({ event, user }) => {
         cancelMeeting({
             variables: { meetingId: meeting._id },
         })
+        setHasFutureBooking(false)
     }
 
     if (meetings && !meetingsLoaded) {
