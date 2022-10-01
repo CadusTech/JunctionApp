@@ -17,6 +17,8 @@ import {
 } from '@material-ui/core'
 import { useDispatch, useSelector } from 'react-redux'
 import PageHeader from 'components/generic/PageHeader'
+import theme from 'material-ui-theme'
+import MeetingLocationSelection from './meetingLocationSelection'
 
 const useStyles = makeStyles(theme => ({
     formWrapper: {
@@ -78,7 +80,10 @@ export default ({ event, user }) => {
     useEffect(() => {
         setDays(eventDays)
         setMeetingsLoaded(false)
-    }, [meetings])
+    }, [eventDays, meetings])
+    const [showLocationSelection, setShowLocationSelection] = useState(false)
+    const [meetingForLocationSelection, setMeetingForLocationSelection] =
+        useState(null)
     const [openCard, setOpenCard] = useState('')
 
     const startDate = new Date(event.startTime)
@@ -118,7 +123,9 @@ export default ({ event, user }) => {
             setTimeout(() => {
                 setDays(eventDays)
                 setMeetingsLoaded(false)
-                dispatch(SnackbarActions.success('Meeting booked successfully'))
+                dispatch(
+                    SnackbarActions.success('Meeting cancelled successfully'),
+                )
             }, 500)
         },
     })
@@ -240,6 +247,10 @@ export default ({ event, user }) => {
                     cardOnClick={() => {
                         cardOnClick(meeting._id)
                     }}
+                    showLocationSelection={() => {
+                        setMeetingForLocationSelection(meeting)
+                        setShowLocationSelection(true)
+                    }}
                 />
             ))
         ) : (
@@ -267,6 +278,20 @@ export default ({ event, user }) => {
 
     return (
         <>
+            {showLocationSelection && (
+                <MeetingLocationSelection
+                    bookAction={() => {
+                        bookMeetingAction(meetingForLocationSelection)
+                    }}
+                    meetingInfo={meetingForLocationSelection}
+                    attendeesCount={att.length + 1}
+                    eventId={event._id}
+                    close={() => {
+                        setMeetingForLocationSelection(null)
+                        setShowLocationSelection(false)
+                    }}
+                />
+            )}
             <PageHeader
                 heading="Meetings"
                 subheading="Book a meeting with Partners to learn more about their Challenge."

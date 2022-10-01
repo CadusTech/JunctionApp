@@ -16,6 +16,19 @@ export const MeetingFull = gql`
         googleMeetLink
     }
 `
+export const MeetingRoomFull = gql`
+    fragment MeetingRoomFull on MeetingRoom {
+        _id
+        name
+        capacity
+        timeSlots {
+            _id
+            start
+            end
+            reserved
+        }
+    }
+`
 
 export const GET_MEETINGS = gql`
     query meetingSlots(
@@ -35,7 +48,16 @@ export const GET_MEETINGS = gql`
     }
     ${MeetingFull}
 `
-export const getMeetingSlots = ({ eventId, challengeId, from, to }) => {
+export const GET_MEETING_ROOMS = gql`
+    query roomsByEvent($eventId: ID!) {
+        roomsByEvent(eventId: $eventId) {
+            ...MeetingRoomFull
+        }
+    }
+    ${MeetingRoomFull}
+`
+
+export const getMeetingslots = ({ eventId, challengeId, from, to }) => {
     const { data, loading, error, refetch } = useQuery(GET_MEETINGS, {
         variables: {
             eventId,
@@ -45,6 +67,16 @@ export const getMeetingSlots = ({ eventId, challengeId, from, to }) => {
         },
     })
     return [data?.meetingSlots, loading, error, refetch]
+}
+
+export const getMeetingRooms = ({ eventId }) => {
+    const { data, loading, error } = useQuery(GET_MEETING_ROOMS, {
+        variables: {
+            eventId,
+        },
+    })
+    console.log('dadada: ', data)
+    return [data?.roomsByEvent, loading, error]
 }
 
 export const getMeetingSlotsWithPolling = ({

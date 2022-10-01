@@ -87,11 +87,11 @@ export default ({
     endTime,
     booked,
     googleMeetLink,
-    bookAction,
     cancelAction,
     hasFutureBooking,
     isOpen,
     cardOnClick,
+    showLocationSelection,
 }) => {
     const start = new Date(startTime)
     const end = new Date(endTime)
@@ -137,7 +137,7 @@ export default ({
                     className={classes.actionButton}
                     variant="contained"
                     color="primary"
-                    onClick={bookAction}
+                    onClick={showLocationSelection}
                     disabled={hasFutureBooking}
                     tooltipText="You can only have one upcoming meeting at a time."
                 >
