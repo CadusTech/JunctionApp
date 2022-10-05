@@ -1,5 +1,6 @@
 const {
     GraphQLObjectType,
+    GraphQLBoolean,
     GraphQLID,
     GraphQLString,
     GraphQLNonNull,
@@ -46,6 +47,30 @@ const MeetingType = new GraphQLObjectType({
             },
             googleMeetLink: {
                 type: GraphQLString,
+            },
+        }
+    },
+})
+
+const MeetingMutationDeleteResponseType = new GraphQLObjectType({
+    name: 'DeletedResponse',
+    fields: () => {
+        return {
+            acknowledged: { type: GraphQLBoolean },
+            deletedCount: { type: GraphQLInt },
+        }
+    },
+})
+
+const MeetingsMutationResponseType = new GraphQLObjectType({
+    name: 'MeetingsMutationResponse',
+    fields: () => {
+        return {
+            created: {
+                type: GraphQLList(MeetingType),
+            },
+            deleted: {
+                type: MeetingMutationDeleteResponseType,
             },
         }
     },
@@ -121,6 +146,13 @@ const MutationType = new GraphQLObjectType({
                 meeting: { type: GraphQLNonNull(MeetingInput) },
             },
         },
+        meetingSlotsBulkAction: {
+            type: MeetingsMutationResponseType,
+            args: {
+                create: { type: GraphQLList(GraphQLNonNull(MeetingInput)) },
+                delete: { type: GraphQLList(GraphQLNonNull(GraphQLID)) },
+            },
+        },
         bookMeeting: {
             type: MeetingType,
             args: {
@@ -156,6 +188,15 @@ const Resolvers = {
     Mutation: {
         createMeetingSlot: async (parent, args, context) => {
             return context.controller('Meeting').create(args.meeting)
+        },
+        meetingSlotsBulkAction: async (parent, args, context) => {
+            const created = await context
+                .controller('Meeting')
+                .createMany(args.create)
+            const deleted = await context
+                .controller('Meeting')
+                .deleteMany(args.delete)
+            return { created, deleted }
         },
         bookMeeting: async (parent, args, context) => {
             if (args.meetingId && args.attendees) {

@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 const { Auth } = require('@hackjunction/shared')
 const DataLoader = require('dataloader')
 const Meeting = require('./model')
@@ -43,7 +44,7 @@ class MeetingContorller {
             event: eventId,
             startTime: { $gte: from, $lt: to },
         }
-        return this._clean(Meeting.find(queryParams))
+        return this._clean(Meeting.find(queryParams).sort({ startTime: 'asc' }))
         // {createdAt:{$gte:ISODate("2021-01-01"),$lt:ISODate("2020-05-01"}}
     }
 
@@ -75,6 +76,79 @@ class MeetingContorller {
             timeZone: meeting.timeZone || 'Europe/Helsinki',
         })
         return this._cleanOne(newMeetingSlot.save())
+    }
+
+    async deleteMany(meetings) {
+        if (!(this.isChallengePartner && meetings.length > 0))
+            return { acknowledged: false, deletedCount: 0 }
+
+        meetings.forEach(async meetingId => {
+            try {
+                const meetingToCancel = await Meeting.findOne({
+                    _id: meetingId,
+                })
+                deleteGoogleEvent(meetingToCancel.googleEventId)
+            } catch (err) {
+                console.error(
+                    `failed to delete googleEvent from meeting: ${meetingId}`,
+                )
+            }
+        })
+
+        return Meeting.deleteMany({
+            _id: {
+                $in: meetings,
+            },
+        })
+    }
+
+    async createMany(meetings) {
+        if (!(this.isChallengePartner && meetings.length > 0)) return []
+        const event = await Event.findOne({ _id: meetings[0].event })
+        if (!(event && event.challenges.length > 0)) return []
+        const challenge = event.challenges.find(
+            c => c._id.toString() === meetings[0].challenge,
+        )
+
+        if (!(challenge && challenge.partnerEmail))
+            return new Error(
+                `unable to find challenge: ${meetings[0].challenge}, or challenge is missing "partnerEmail"`,
+            )
+        const created = []
+        for (let i = 0; i < meetings.length; i++) {
+            const meeting = meetings[i]
+            const current = await Meeting.findOne({
+                challenge: meeting.challenge,
+                event: meeting.event,
+                startTime: meeting.startTime,
+                endTime: meeting.endTime,
+            })
+            if (!current) {
+                const newMeetingSlot = new Meeting({
+                    event: meeting.event,
+                    challenge: meeting.challenge,
+                    organizerEmail: challenge.partnerEmail,
+                    location: meeting.location || '',
+                    title:
+                        meeting.title ||
+                        `Junction: ${challenge.name} partner meeting`,
+                    description:
+                        meeting.description ||
+                        `Junction: ${challenge.name}\nmeeting between participants and partner, ${challenge.partner}. `,
+                    attendees: [],
+                    startTime: meeting.startTime,
+                    endTime: meeting.endTime,
+                    timeZone: meeting.timeZone || 'Europe/Helsinki',
+                })
+                try {
+                    await newMeetingSlot.save()
+                    created.push(newMeetingSlot)
+                } catch (err) {
+                    console.log('Error while saving meeting slot', err)
+                }
+            }
+        }
+        return created
     }
 
     async bookMeeting(meetingId, attendees) {

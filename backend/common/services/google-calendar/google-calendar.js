@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 const fs = require('fs')
-const readline = require('readline')
 const { google } = require('googleapis')
 const uuidv4 = require('uuid/v4')
 const {
@@ -8,11 +7,6 @@ const {
     cancelMeeting,
 } = require('../../../modules/meeting/helpers')
 
-// If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/calendar']
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
 const TOKEN_PATH = `${__dirname}/token.json`
 
 /**
@@ -40,7 +34,6 @@ function authorize(credentials, callback, callbackParameter = null) {
     })
 }
 
->>>>>>> separate scripts for google calendar authentication
 const insertEvent = (auth, eventInfo) => {
     const calendar = google.calendar({ version: 'v3', auth })
     calendar.events.insert(

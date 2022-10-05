@@ -1,4 +1,4 @@
-const { gql, useMutation } = require('@apollo/client')
+const { gql } = require('@apollo/client')
 
 export const MeetingFullFragment = gql`
     fragment MeetingFull on Meeting {
@@ -20,6 +20,20 @@ export const CREATE_MEETING_SLOT = gql`
     mutation createMeetingSlot($meeting: MeetingInput!) {
         createMeetingSlot(meeting: $meeting) {
             ...MeetingFull
+        }
+    }
+    ${MeetingFullFragment}
+`
+
+export const MEETINGS_BULK_ACTION = gql`
+    mutation meetingSlotsBulkAction($create: [MeetingInput!], $delete: [ID!]) {
+        meetingSlotsBulkAction(create: $create, delete: $delete) {
+            created {
+                ...MeetingFull
+            }
+            deleted {
+                deletedCount
+            }
         }
     }
     ${MeetingFullFragment}
