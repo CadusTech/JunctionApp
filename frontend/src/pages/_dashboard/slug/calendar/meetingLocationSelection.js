@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
         position: 'relative',
         width: '70%',
         margin: '0 auto',
-        height: '70vh',
+        height: 'fit-content',
         maxHeight: '70vh',
         marginTop: 'calc(100vh - 85vh - 20px)',
         backgroundColor: '#fff',
@@ -49,6 +49,7 @@ const useStyles = makeStyles(theme => ({
 
 export default ({ bookAction, meetingInfo, close }) => {
     const [onlineSelected, setOnlineSelected] = useState(true)
+    const [roomSelected, setRoomSelected] = useState(null)
     const start = new Date(meetingInfo.startTime)
     const end = new Date(meetingInfo.endTime)
     const startMinutes = start.getMinutes()
@@ -56,6 +57,23 @@ export default ({ bookAction, meetingInfo, close }) => {
 
     const handleLocationChange = selection => {
         setOnlineSelected(selection)
+    }
+
+    const rooms = [
+        'Y229',
+        'Y338',
+        'K220',
+        'A330',
+        'L221',
+        'L440',
+        'H110',
+        'J220',
+        'K123',
+        'R200',
+    ]
+
+    const handleRoomChange = event => {
+        setRoomSelected(event.target.value)
     }
 
     const classes = useStyles()
@@ -139,27 +157,43 @@ export default ({ bookAction, meetingInfo, close }) => {
                             Physical
                         </Button>
                     </div>
-                    {onlineSelected ? (
-                        <p>
-                            Confirm the booking to receive a Google Meet link
-                            for the meeting.
-                        </p>
-                    ) : (
+                    {!onlineSelected && (
                         <FormControl style={{ width: '70%' }}>
                             <InputLabel id="challenge-selection-label">
                                 Rooms
                             </InputLabel>
+                            {}
                             <Select
-                                labelId="challenge-selection-label"
-                                id="challenge-selection"
-                                label="Choose a challenge"
+                                labelId="room-selection-label"
+                                id="room-selection"
+                                label="Choose a room"
+                                onChange={handleRoomChange}
                             >
-                                <MenuItem value="1">Room 1</MenuItem>
-                                <MenuItem value="2">Room 2</MenuItem>
-                                <MenuItem value="3">Room 3</MenuItem>
-                                <MenuItem value="4">Room 4</MenuItem>
+                                {rooms.map((room, index) => (
+                                    <MenuItem value={room}>{room}</MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
+                    )}
+                </div>
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginTop: '10%',
+                    }}
+                >
+                    {roomSelected && !onlineSelected && (
+                        <p>
+                            Confirm the booking to arrange a meeting in{' '}
+                            {roomSelected}
+                        </p>
+                    )}
+                    {onlineSelected && (
+                        <p>
+                            Confirm the booking to receive a Google Meet link
+                            for the meeting.
+                        </p>
                     )}
                 </div>
                 <div
