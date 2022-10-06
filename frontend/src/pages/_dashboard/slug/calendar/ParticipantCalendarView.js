@@ -272,6 +272,7 @@ export default ({ event, user }) => {
                     bookAction={() => {
                         bookMeetingAction(meetingForLocationSelection)
                     }}
+                    meetingInfo={meetingForLocationSelection}
                     close={() => {
                         setMeetingForLocationSelection(null)
                         setShowLocationSelection(false)
