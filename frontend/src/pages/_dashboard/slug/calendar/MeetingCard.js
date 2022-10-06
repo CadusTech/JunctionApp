@@ -113,19 +113,21 @@ export default ({
         <>
             {booked ? (
                 <div className={classes.meetingInfo}>
-                    <a
-                        className={classes.meetsLink}
-                        href={googleMeetLink}
-                        target="blank"
-                    >
-                        <Button
-                            className={classes.joinButton}
-                            variant="contained"
-                            color="theme_orange"
+                    {googleMeetLink.length !== 0 ? (
+                        <a
+                            className={classes.meetsLink}
+                            href={googleMeetLink}
+                            target="blank"
                         >
-                            JOIN MEETING
-                        </Button>
-                    </a>
+                            <Button
+                                className={classes.joinButton}
+                                variant="contained"
+                                color="theme_orange"
+                            >
+                                JOIN MEETING
+                            </Button>
+                        </a>
+                    ) : null}
                     <Button
                         className={classes.actionButton}
                         variant="contained"

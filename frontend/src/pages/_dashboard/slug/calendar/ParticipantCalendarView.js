@@ -182,7 +182,11 @@ export default ({ event, user }) => {
         meetings.forEach(meeting => {
             const meetingStartDate = new Date(meeting.startTime)
             const meetingDateStr = meetingStartDate.toISOString().split('T')[0]
-            if (daysObj[meetingDateStr]) {
+            if (
+                daysObj[meetingDateStr] &&
+                (meeting.attendees.includes(user.userId) ||
+                    meeting.attendees.length === 0)
+            ) {
                 daysObj[meetingDateStr] =
                     daysObj[meetingDateStr].concat(meeting)
             }
