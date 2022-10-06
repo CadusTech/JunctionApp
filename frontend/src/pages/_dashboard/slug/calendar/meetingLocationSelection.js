@@ -1,19 +1,14 @@
 import React, { useState } from 'react'
-import { useMutation } from '@apollo/client'
-import { BOOK_MEETING, CREATE_MEETING_SLOT } from 'graphql/mutations/meetings'
-import * as SnackbarActions from 'redux/snackbar/actions'
-import { getMeetingslots } from 'graphql/queries/meetings'
 
 import Button from 'components/generic/Button'
-import MuiButton from '@material-ui/core/Button'
-import { Link, makeStyles, Tooltip, withStyles } from '@material-ui/core'
-import { useDispatch } from 'react-redux'
-import theme from 'material-ui-theme'
-import { CallMissedSharp } from '@material-ui/icons'
-import BorderLessToggleButton from '@material-ui/lab/ToggleButton'
-import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup'
 
-import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core'
+import {
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    makeStyles,
+} from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
     background: {
@@ -52,26 +47,15 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-export default ({
-    // startTime,
-    // endTime,
-    // booked,
-    // googleMeetLink,
-    // bookAction,
-    // cancelAction,
-    // hasFutureBooking,
-    bookAction,
-    meetingInfo,
-    close,
-}) => {
-    const [selected, setSelected] = React.useState('online')
+export default ({ bookAction, meetingInfo, close }) => {
+    const [onlineSelected, setOnlineSelected] = useState(true)
     const start = new Date(meetingInfo.startTime)
     const end = new Date(meetingInfo.endTime)
     const startMinutes = start.getMinutes()
     const endMinutes = end.getMinutes()
 
-    const handleChange = selection => {
-        setSelected(selection)
+    const handleLocationChange = selection => {
+        setOnlineSelected(selection)
     }
 
     const classes = useStyles()
@@ -129,7 +113,7 @@ export default ({
                         <Button
                             variant="contained"
                             className={
-                                selected === 'online'
+                                onlineSelected
                                     ? classes.selected
                                     : classes.notSelected
                             }
@@ -137,7 +121,7 @@ export default ({
                                 marginRight: '0.5rem',
                                 padding: '0.75rem 2rem',
                             }}
-                            onClick={() => handleChange('online')}
+                            onClick={() => handleLocationChange(true)}
                         >
                             Online
                         </Button>
@@ -145,17 +129,22 @@ export default ({
                         <Button
                             variant="contained"
                             className={
-                                selected === 'physical'
-                                    ? classes.selected
-                                    : classes.notSelected
+                                onlineSelected
+                                    ? classes.notSelected
+                                    : classes.selected
                             }
                             style={{ padding: '0.75rem 2rem' }}
-                            onClick={() => handleChange('physical')}
+                            onClick={() => handleLocationChange(false)}
                         >
                             Physical
                         </Button>
                     </div>
-                    {selected === 'physical' ? (
+                    {onlineSelected ? (
+                        <p>
+                            Confirm the booking to receive a Google Meet link
+                            for the meeting.
+                        </p>
+                    ) : (
                         <FormControl style={{ width: '70%' }}>
                             <InputLabel id="challenge-selection-label">
                                 Rooms
@@ -171,17 +160,12 @@ export default ({
                                 <MenuItem value="4">Room 4</MenuItem>
                             </Select>
                         </FormControl>
-                    ) : (
-                        <p>
-                            Confirm the booking to receive a Google Meet link
-                            for the meeting.
-                        </p>
                     )}
                 </div>
                 <div
                     style={{
                         display: 'flex',
-                        justifyContent: 'flex-end',
+                        justifyContent: 'center',
                         marginTop: 'auto',
                     }}
                 >
