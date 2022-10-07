@@ -128,7 +128,7 @@ export default ({
                     color="primary"
                     onClick={bookAction}
                     disabled={true}
-                    tooltipText="Kikkeli on hyvää MUUTA TÄÄ ja sit kato et toi disabled state tulee sen future bookingin kautta"
+                    tooltipText="redacted"
                 >
                     Book this meeting
                 </ButtonWithTooltip>

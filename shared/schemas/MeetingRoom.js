@@ -1,5 +1,6 @@
 const {
     GraphQLInt,
+    GraphQLID,
     GraphQLBoolean,
     GraphQLObjectType,
     GraphQLList,
@@ -35,6 +36,9 @@ const MeetingRoomSchema = new mongoose.Schema({
 const MeetingRoomType = new GraphQLObjectType({
     name: 'MeetingRoom',
     fields: {
+        _id: {
+            type: GraphQLNonNull(GraphQLID),
+        },
         name: {
             type: GraphQLNonNull(GraphQLString),
         },
@@ -46,6 +50,9 @@ const MeetingRoomType = new GraphQLObjectType({
                 new GraphQLObjectType({
                     name: 'MeetingRoomTimeSlot',
                     fields: {
+                        _id: {
+                            type: GraphQLNonNull(GraphQLID),
+                        },
                         start: {
                             type: GraphQLNonNull(GraphQLDate),
                         },
