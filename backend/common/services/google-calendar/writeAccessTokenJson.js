@@ -1,7 +1,6 @@
+/* eslint-disable camelcase */
 const fs = require('fs')
-const readline = require('readline')
 const { google } = require('googleapis')
-const uuidv4 = require('uuid/v4')
 
 const TOKEN_PATH = `${__dirname}/token.json`
 

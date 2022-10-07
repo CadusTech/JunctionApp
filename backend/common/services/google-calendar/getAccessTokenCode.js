@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 const fs = require('fs')
 const { google } = require('googleapis')
-const uuidv4 = require('uuid/v4')
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/calendar']

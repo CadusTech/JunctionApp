@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { BOOK_MEETING, CANCEL_MEETING } from 'graphql/mutations/meetings'
 import * as SnackbarActions from 'redux/snackbar/actions'
@@ -27,6 +27,7 @@ const useStyles = makeStyles(theme => ({
         display: 'flex',
         width: '100%',
         height: 'max-content',
+        overflowX: 'scroll',
     },
     column: noOfEventDays => ({
         width: noOfEventDays > 2 ? '33%' : '50%',
@@ -42,7 +43,6 @@ const useStyles = makeStyles(theme => ({
     columnContent: {
         height: '600px',
         padding: '0 0.5em',
-        overflowX: 'scroll',
     },
     iconVisible: {
         padding: '0.5em 0.25em 0.2em 0.4em',
@@ -147,7 +147,7 @@ export default ({ event, user }) => {
         },
     })
 
-    const handleChange = event => {
+    const handleChallengeChange = event => {
         if (event.target.value !== challenge) {
             // init days back to object with only days of event, but no meeting slots from challenge, as this will be repopulated
             setDays(eventDays)
@@ -281,7 +281,7 @@ export default ({ event, user }) => {
                     id="challenge-selection"
                     value={challenge}
                     label="Choose a challenge"
-                    onChange={handleChange}
+                    onChange={handleChallengeChange}
                 >
                     {challenges.map((c, index) => (
                         <MenuItem key={index} value={c._id}>
