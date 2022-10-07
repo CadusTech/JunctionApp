@@ -1,14 +1,8 @@
-import React, { useState } from 'react'
-import { useMutation } from '@apollo/client'
-import { BOOK_MEETING, CREATE_MEETING_SLOT } from 'graphql/mutations/meetings'
-import * as SnackbarActions from 'redux/snackbar/actions'
-import { getMeetingslots } from 'graphql/queries/meetings'
+import React from 'react'
 
 import Button from 'components/generic/Button'
 import MuiButton from '@material-ui/core/Button'
-import { Link, makeStyles, Tooltip, withStyles } from '@material-ui/core'
-import { useDispatch } from 'react-redux'
-import theme from 'material-ui-theme'
+import { makeStyles, Tooltip, withStyles } from '@material-ui/core'
 
 const useStyles = makeStyles(theme => ({
     meetingCard: ({ booked, isOpenable }) => ({

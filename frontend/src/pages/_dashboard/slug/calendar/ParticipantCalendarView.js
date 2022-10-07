@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { BOOK_MEETING, CANCEL_MEETING } from 'graphql/mutations/meetings'
 import * as SnackbarActions from 'redux/snackbar/actions'
@@ -8,7 +8,6 @@ import MeetingCard from './MeetingCard'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos'
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'
 
-import Button from 'components/generic/Button'
 import {
     FormControl,
     InputLabel,
@@ -17,9 +16,7 @@ import {
     Select,
 } from '@material-ui/core'
 import { useDispatch, useSelector } from 'react-redux'
-import { divide } from 'lodash-es'
 import PageHeader from 'components/generic/PageHeader'
-import theme from 'material-ui-theme'
 
 const useStyles = makeStyles(theme => ({
     formWrapper: {
