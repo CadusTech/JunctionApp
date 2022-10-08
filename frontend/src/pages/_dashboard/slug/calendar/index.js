@@ -20,13 +20,14 @@ export default () => {
     )
     return (
         <>
-            <Button
+            {/* button for DEV to swithc between participant / partner view */}
+            {/* <Button
                 onClick={() => setIsPartner(!isPartner)}
                 color="primary"
                 variant="contained"
             >
                 Switch between participant / partner view (only for dev)
-            </Button>
+            </Button> */}
             {isPartner ? (
                 <PartnerCalendarView event={event} />
             ) : (

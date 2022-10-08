@@ -124,7 +124,10 @@ export default ({ value, onChange }) => {
     const renderListItem = (room, index) => {
         return (
             <ListItem key={room.name} divider>
-                <ListItemText primary={room.name} secondary={room.capacity} />
+                <ListItemText
+                    primary={room.name}
+                    secondary={`Capacity: ${room.capacity}`}
+                />
                 <ListItemSecondaryAction>
                     <Tooltip title="Edit room">
                         <IconButton onClick={() => handleEditStart(index)}>

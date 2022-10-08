@@ -40,8 +40,16 @@ export const MEETINGS_BULK_ACTION = gql`
 `
 
 export const BOOK_MEETING = gql`
-    mutation bookMeeting($meetingId: String!, $attendees: [String!]!) {
-        bookMeeting(meetingId: $meetingId, attendees: $attendees) {
+    mutation bookMeeting(
+        $meetingId: String!
+        $attendees: [String!]!
+        $location: String
+    ) {
+        bookMeeting(
+            meetingId: $meetingId
+            attendees: $attendees
+            location: $location
+        ) {
             ...MeetingFull
         }
     }

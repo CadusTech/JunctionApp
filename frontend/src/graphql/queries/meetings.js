@@ -14,6 +14,7 @@ export const MeetingFull = gql`
         endTime
         timeZone
         googleMeetLink
+        location
     }
 `
 export const MeetingRoomFull = gql`
@@ -57,7 +58,7 @@ export const GET_MEETING_ROOMS = gql`
     ${MeetingRoomFull}
 `
 
-export const getMeetingslots = ({ eventId, challengeId, from, to }) => {
+export const getMeetingSlots = ({ eventId, challengeId, from, to }) => {
     const { data, loading, error, refetch } = useQuery(GET_MEETINGS, {
         variables: {
             eventId,
@@ -75,7 +76,6 @@ export const getMeetingRooms = ({ eventId }) => {
             eventId,
         },
     })
-    console.log('dadada: ', data)
     return [data?.roomsByEvent, loading, error]
 }
 

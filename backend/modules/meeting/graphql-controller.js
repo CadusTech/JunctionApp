@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 const { Auth } = require('@hackjunction/shared')
 const DataLoader = require('dataloader')
 const Meeting = require('./model')
@@ -21,6 +20,35 @@ async function batchGetMeetingsByIds(ids) {
         return map
     }, {})
     return ids.map(_id => resultsMap[_id] || null)
+}
+
+const updateRoomSlotReservedStatus = async (
+    eventId,
+    reserved,
+    roomName,
+    slotStartsAt,
+) => {
+    try {
+        const event = await Event.findById(eventId)
+        if (!event) return false
+        const roomsClone = [...event.meetingRooms]
+        const room = roomsClone.find(r => r.name === roomName)
+        const slot = room.timeSlots.find(
+            s => s.start.toString() === slotStartsAt.toString(),
+        )
+        if (room && slot) {
+            // fails if we want to reserve the room but it is already reserved
+            if (slot.reserved && reserved) return false
+            slot.reserved = reserved
+            event.meetingRooms = roomsClone
+            event.markModified('meetingRooms')
+            event.save()
+            return true
+        }
+        return false
+    } catch (err) {
+        return false
+    }
 }
 
 class MeetingContorller {
@@ -85,12 +113,27 @@ class MeetingContorller {
                 const meetingToCancel = await Meeting.findOne({
                     _id: meetingId,
                 })
-                deleteGoogleEvent(meetingToCancel.googleEventId)
+                if (!meetingToCancel) return null
+                if (
+                    meetingToCancel.location !== 'ONLINE' &&
+                    meetingToCancel.location !== ''
+                ) {
+                    await updateRoomSlotReservedStatus(
+                        meetingToCancel.event,
+                        false,
+                        meetingToCancel.location,
+                        meetingToCancel.startTime,
+                    )
+                }
+                if (meetingToCancel.googleEventId) {
+                    deleteGoogleEvent(meetingToCancel.googleEventId)
+                }
             } catch (err) {
                 console.error(
                     `failed to delete googleEvent from meeting: ${meetingId}`,
                 )
             }
+            return 'useless return, to silence ESLint :D'
         })
 
         return Meeting.deleteMany({
@@ -115,6 +158,7 @@ class MeetingContorller {
         const created = []
         for (let i = 0; i < meetings.length; i++) {
             const meeting = meetings[i]
+            // eslint-disable-next-line no-await-in-loop
             const current = await Meeting.findOne({
                 challenge: meeting.challenge,
                 event: meeting.event,
@@ -126,7 +170,7 @@ class MeetingContorller {
                     event: meeting.event,
                     challenge: meeting.challenge,
                     organizerEmail: challenge.partnerEmail,
-                    location: meeting.location || '',
+                    location: '',
                     title:
                         meeting.title ||
                         `Junction: ${challenge.name} partner meeting`,
@@ -139,6 +183,7 @@ class MeetingContorller {
                     timeZone: meeting.timeZone || 'Europe/Helsinki',
                 })
                 try {
+                    // eslint-disable-next-line no-await-in-loop
                     await newMeetingSlot.save()
                     created.push(newMeetingSlot)
                 } catch (err) {
@@ -149,49 +194,72 @@ class MeetingContorller {
         return created
     }
 
-    async bookMeeting(meetingId, attendees) {
+    async bookMeeting(meetingId, attendees, location = 'ONLINE') {
         if (!(meetingId && attendees && attendees.length > 0)) return null
         const meetingToBook = await Meeting.findOne({ _id: meetingId })
         // return null if meeting already has attendees (already booked)
-        if (meetingToBook.attendees.length !== 0) return null
+        if (!meetingToBook || meetingToBook.attendees.length !== 0) return null
         const attendeeProfiles = await UsersController.getUserProfiles(
             attendees,
         )
 
-        const googleEvent = {
-            title: meetingToBook.title,
-            description: meetingToBook.description,
-            location: meetingToBook.location,
-            start: {
-                dateTime: meetingToBook.startTime,
-                timeZone: meetingToBook.timeZone,
-            },
-            end: {
-                dateTime: meetingToBook.endTime,
-                timeZone: meetingToBook.timeZone,
-            },
-            attendees: [
-                ...attendeeProfiles.map(attendee => ({
-                    email: attendee.email,
-                    responseStatus: 'needsAction',
-                    organizer: false,
-                })),
-                {
-                    email: meetingToBook.organizerEmail,
-                    responseStatus: 'needsAction',
-                    organizer: true,
-                },
-            ],
-            meetingId,
+        let roomBookedSuccessfully = false
+        if (location !== '' && location !== 'ONLINE') {
+            roomBookedSuccessfully = await updateRoomSlotReservedStatus(
+                meetingToBook.event,
+                true,
+                location,
+                meetingToBook.startTime,
+            )
         }
 
-        // create google calednar event and meets link
-        createGoogleEvent(googleEvent)
+        const newLocation =
+            // eslint-disable-next-line no-nested-ternary
+            location === 'ONLINE'
+                ? 'ONLINE'
+                : roomBookedSuccessfully
+                ? location
+                : ''
 
+        if (newLocation === 'ONLINE' || newLocation === '') {
+            const googleEvent = {
+                title: meetingToBook.title,
+                description: meetingToBook.description,
+                location: newLocation,
+                start: {
+                    dateTime: meetingToBook.startTime,
+                    timeZone: meetingToBook.timeZone,
+                },
+                end: {
+                    dateTime: meetingToBook.endTime,
+                    timeZone: meetingToBook.timeZone,
+                },
+                attendees: [
+                    ...attendeeProfiles.map(attendee => ({
+                        email: attendee.email,
+                        responseStatus: 'needsAction',
+                        organizer: false,
+                    })),
+                    {
+                        email: meetingToBook.organizerEmail,
+                        responseStatus: 'needsAction',
+                        organizer: true,
+                    },
+                ],
+                meetingId,
+            }
+
+            // create google calednar event and meets link
+            createGoogleEvent(googleEvent)
+        }
         return this._cleanOne(
             Meeting.findOneAndUpdate(
                 { _id: meetingId },
-                { ...meetingToBook.toObject(), attendees },
+                {
+                    ...meetingToBook.toObject(),
+                    attendees,
+                    location: newLocation,
+                },
                 { new: true },
             ),
         )
@@ -200,12 +268,27 @@ class MeetingContorller {
     async cancelMeeting(meetingId) {
         if (!meetingId) return null
         const meetingToCancel = await Meeting.findOne({ _id: meetingId })
+        if (!meetingToCancel) return null
+        if (
+            meetingToCancel.location !== 'ONLINE' &&
+            meetingToCancel.location !== ''
+        ) {
+            await updateRoomSlotReservedStatus(
+                meetingToCancel.event,
+                false,
+                meetingToCancel.location,
+                meetingToCancel.startTime,
+            )
+        }
 
         // remove google calendar event
-        deleteGoogleEvent(meetingToCancel.googleEventId)
+        if (meetingToCancel.googleEventId) {
+            deleteGoogleEvent(meetingToCancel.googleEventId)
+        }
         meetingToCancel.attendees = []
         meetingToCancel.googleEventId = ''
         meetingToCancel.googleMeetLink = ''
+        meetingToCancel.location = ''
 
         return this._cleanOne(meetingToCancel.save())
     }

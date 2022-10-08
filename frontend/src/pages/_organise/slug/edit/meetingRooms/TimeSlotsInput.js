@@ -104,6 +104,7 @@ export default ({ value, onChange }) => {
                                         start: value,
                                     })
                                 }
+                                timezone={'Europe/Helsinki'}
                             />
                         </Grid>
                         <Grid item xs={1}>
@@ -122,6 +123,7 @@ export default ({ value, onChange }) => {
                                         end: value,
                                     })
                                 }
+                                timezone={'Europe/Helsinki'}
                             />
                         </Grid>
                         <Grid item xs={1}>

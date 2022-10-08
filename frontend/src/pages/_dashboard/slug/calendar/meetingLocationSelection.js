@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import Button from 'components/generic/Button'
 
@@ -16,7 +16,8 @@ const useStyles = makeStyles(theme => ({
         position: 'absolute',
         backgroundColor: '#00000080',
         width: '100%',
-        height: '100%',
+        minHeight: '100vh',
+        zIndex: 100,
         top: '0',
         left: '0',
     },
@@ -32,6 +33,10 @@ const useStyles = makeStyles(theme => ({
         padding: '20px',
         border: '1px solid #999',
         overflow: 'auto',
+        zIndex: 10,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
     },
     closeIcon: {
         width: '25px',
@@ -46,11 +51,38 @@ const useStyles = makeStyles(theme => ({
         border: theme.palette.grey[300],
         background: theme.palette.grey[300],
     },
+    roomSelectLabel: {
+        display: 'flex',
+        justifyContent: 'space-between',
+    },
+    capacityWarning: {
+        padding: '1em',
+        fontWeight: 'bold',
+        backgroundColor: theme.palette.error.light,
+        color: 'white',
+        borderRadius: '0.5em',
+        margin: 0,
+    },
+    physicalConfirmationText: {
+        textAlign: 'center',
+        flexDirection: 'column',
+        justifyContent: 'space-evenly',
+        margin: '2em',
+    },
+    warnColor: {
+        color: theme.palette.error.main,
+    },
 }))
 
-export default ({ bookAction, meetingInfo, attendeesCount, eventId, close }) => {
+export default ({
+    bookFunction,
+    meetingInfo,
+    attendeesCount,
+    eventId,
+    close,
+}) => {
     const [onlineSelected, setOnlineSelected] = useState(true)
-    const [roomSelected, setRoomSelected] = useState(null)
+    const [roomSelected, setRoomSelected] = useState('')
     const start = new Date(meetingInfo.startTime)
     const end = new Date(meetingInfo.endTime)
     const startMinutes = start.getMinutes()
@@ -58,42 +90,55 @@ export default ({ bookAction, meetingInfo, attendeesCount, eventId, close }) => 
     const [meetingRooms, loading, error] = getMeetingRooms({
         eventId: eventId,
     })
+    const [roomsLoaded, setRoomsLoaded] = useState(false)
+    const [availableRooms, setAvailableRooms] = useState([])
 
-
+    useEffect(() => {
+        if (meetingRooms && !roomsLoaded) {
+            const filteredRooms = []
+            meetingRooms.forEach(room => {
+                // don't filter based on capacity, attendees will be warned if they choose a small room
+                // const isLargeEnough = room.capacity >= attendeesCount
+                const hasAvailableSlot = room.timeSlots.some(slot => {
+                    return slot.start === start.toISOString() && !slot.reserved
+                })
+                if (hasAvailableSlot) {
+                    filteredRooms.push(room.name)
+                }
+            })
+            setAvailableRooms(filteredRooms)
+            setRoomsLoaded(true)
+        }
+    }, [attendeesCount, meetingRooms, roomsLoaded, start])
 
     const handleLocationChange = selection => {
         setOnlineSelected(selection)
     }
 
-    const rooms = [
-        'Y229',
-        'Y338',
-        'K220',
-        'A330',
-        'L221',
-        'L440',
-        'H110',
-        'J220',
-        'K123',
-        'R200',
-    ]
-
     const handleRoomChange = event => {
         setRoomSelected(event.target.value)
+    }
+
+    const confirmButtonEnabled = () => onlineSelected || roomSelected !== ''
+
+    const confirmButtonAction = () => {
+        if (onlineSelected) {
+            bookFunction(meetingInfo, 'ONLINE')
+        } else {
+            bookFunction(meetingInfo, roomSelected)
+        }
+    }
+
+    const displayCapacityWarning = () => {
+        if (roomSelected === '') return false
+        const selectedRoom = meetingRooms.find(r => r.name === roomSelected)
+        return selectedRoom?.capacity < attendeesCount
     }
 
     const classes = useStyles()
     return (
         <div className={classes.background}>
-            <div
-                className={classes.popupWindow}
-                style={{
-                    zIndex: 10,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-start',
-                }}
-            >
+            <div className={classes.popupWindow}>
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button onClick={close} className={classes.closeIcon}>
                         X
@@ -163,24 +208,62 @@ export default ({ bookAction, meetingInfo, attendeesCount, eventId, close }) => 
                             Physical
                         </Button>
                     </div>
-                    {!onlineSelected && (
-                        <FormControl style={{ width: '70%' }}>
-                            <InputLabel id="challenge-selection-label">
-                                Rooms
-                            </InputLabel>
-                            {}
-                            <Select
-                                labelId="room-selection-label"
-                                id="room-selection"
-                                label="Choose a room"
-                                onChange={handleRoomChange}
+                    {!onlineSelected &&
+                        (roomsLoaded && availableRooms.length > 0 ? (
+                            <FormControl style={{ width: '70%' }}>
+                                <InputLabel id="challenge-selection-label">
+                                    Rooms
+                                </InputLabel>
+                                {}
+                                <Select
+                                    labelId="room-selection-label"
+                                    id="room-selection"
+                                    label="Choose a room"
+                                    onChange={handleRoomChange}
+                                    value={roomSelected}
+                                >
+                                    {availableRooms.map((room, index) => {
+                                        const roomInfo = meetingRooms.find(
+                                            r => r.name === room,
+                                        )
+                                        return (
+                                            <MenuItem
+                                                key={index}
+                                                value={room}
+                                                className={
+                                                    classes.roomSelectLabel
+                                                }
+                                            >
+                                                <span>{room}</span>
+                                                {roomInfo && (
+                                                    <span>
+                                                        {' (capacity: '}
+                                                        <span
+                                                            className={
+                                                                roomInfo.capacity <
+                                                                attendeesCount
+                                                                    ? classes.warnColor
+                                                                    : ''
+                                                            }
+                                                        >
+                                                            {roomInfo.capacity}
+                                                        </span>
+                                                        {')'}
+                                                    </span>
+                                                )}
+                                            </MenuItem>
+                                        )
+                                    })}
+                                </Select>
+                            </FormControl>
+                        ) : (
+                            <p
+                                className={classes.warnColor}
+                                style={{ fontSize: '1.25em' }}
                             >
-                                {rooms.map((room, index) => (
-                                    <MenuItem value={room}>{room}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                    )}
+                                No rooms available for selected time slot {':('}
+                            </p>
+                        ))}
                 </div>
                 <div
                     style={{
@@ -190,10 +273,18 @@ export default ({ bookAction, meetingInfo, attendeesCount, eventId, close }) => 
                     }}
                 >
                     {roomSelected && !onlineSelected && (
-                        <p>
-                            Confirm the booking to arrange a meeting in{' '}
-                            {roomSelected}
-                        </p>
+                        <div className={classes.physicalConfirmationText}>
+                            <p>
+                                Confirm the booking to arrange a meeting in{' '}
+                                <strong>{roomSelected}</strong>
+                            </p>
+                            {displayCapacityWarning() && (
+                                <p className={classes.capacityWarning}>
+                                    Be advised: the chosen room might be small
+                                    for your team size
+                                </p>
+                            )}
+                        </div>
                     )}
                     {onlineSelected && (
                         <p>
@@ -209,7 +300,13 @@ export default ({ bookAction, meetingInfo, attendeesCount, eventId, close }) => 
                         marginTop: 'auto',
                     }}
                 >
-                    <Button variant="contained">Confirm</Button>
+                    <Button
+                        disabled={!confirmButtonEnabled()}
+                        variant="contained"
+                        onClick={confirmButtonAction}
+                    >
+                        Confirm
+                    </Button>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { BOOK_MEETING, CANCEL_MEETING } from 'graphql/mutations/meetings'
 import * as SnackbarActions from 'redux/snackbar/actions'
@@ -9,6 +9,7 @@ import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos'
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'
 
 import {
+    CircularProgress,
     FormControl,
     InputLabel,
     makeStyles,
@@ -17,8 +18,7 @@ import {
 } from '@material-ui/core'
 import { useDispatch, useSelector } from 'react-redux'
 import PageHeader from 'components/generic/PageHeader'
-import theme from 'material-ui-theme'
-import MeetingLocationSelection from './meetingLocationSelection'
+import MeetingLocationSelection from './MeetingLocationSelection'
 
 const useStyles = makeStyles(theme => ({
     formWrapper: {
@@ -62,6 +62,20 @@ const useStyles = makeStyles(theme => ({
         marginLeft: theme.spacing(0.5),
         fontSize: '1rem',
     },
+    loadingOverlay: {
+        width: '100%',
+        minHeight: '100vh',
+        background: 'rgba(255,255,255,0.6)',
+        zIndex: 200,
+        position: 'absolute',
+        top: '0',
+        left: '0',
+    },
+    loadingSpinner: {
+        marginTop: '50%',
+        marginLeft: '50%',
+        transform: 'translateXY(-24px, -24px)',
+    },
 }))
 
 export default ({ event, user }) => {
@@ -71,16 +85,7 @@ export default ({ event, user }) => {
     const [noOfDaysToShow, setNoOfDaysToShow] = useState(3)
     const dispatch = useDispatch()
     const [meetingsLoaded, setMeetingsLoaded] = useState(false)
-    const [meetings, loading, error] = getMeetingSlotsWithPolling({
-        eventId: event._id,
-        from: event.startTime,
-        to: event.endTime,
-        challengeId: challenge,
-    })
-    useEffect(() => {
-        setDays(eventDays)
-        setMeetingsLoaded(false)
-    }, [eventDays, meetings])
+    const [loading, setLoading] = useState(false)
     const [showLocationSelection, setShowLocationSelection] = useState(false)
     const [meetingForLocationSelection, setMeetingForLocationSelection] =
         useState(null)
@@ -96,8 +101,19 @@ export default ({ event, user }) => {
         date.setDate(startDate.getDate() + i)
         eventDays[date.toISOString().split('T')[0]] = []
     }
+    const [meetings, loadingMeetings, error] = getMeetingSlotsWithPolling({
+        eventId: event._id,
+        from: event.startTime,
+        to: event.endTime,
+        challengeId: challenge,
+    })
+    useEffect(() => {
+        setDays(eventDays)
+        setMeetingsLoaded(false)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [meetings])
     const [hasFutureBooking, setHasFutureBooking] = useState(false)
-    const [days, setDays] = useState(eventDays)
+    const [days, setDays] = useState({})
     const classes = useStyles(dayDifference)
     const [cancelMeeting, cancelMeetingResult] = useMutation(CANCEL_MEETING, {
         onError: err => {
@@ -105,7 +121,7 @@ export default ({ event, user }) => {
 
             if (errors) {
                 dispatch(
-                    SnackbarActions.error('Unable to book meeting', {
+                    SnackbarActions.error('Unable to cancel meeting', {
                         errorMessages: Object.keys(errors).map(
                             key => `${key}: ${errors[key].message}`,
                         ),
@@ -113,16 +129,20 @@ export default ({ event, user }) => {
                     }),
                 )
             } else {
-                dispatch(SnackbarActions.error('Unable to book meeting'))
+                dispatch(SnackbarActions.error('Unable to cancel meeting'))
             }
+            setLoading(false)
         },
         onCompleted: res => {
             if (!res) {
-                dispatch(SnackbarActions.error('Failed to book meeting'))
+                dispatch(SnackbarActions.error('Failed to cancel meeting'))
+                setLoading(false)
+                return
             }
             setTimeout(() => {
                 setDays(eventDays)
                 setMeetingsLoaded(false)
+                setLoading(false)
                 dispatch(
                     SnackbarActions.success('Meeting cancelled successfully'),
                 )
@@ -145,6 +165,7 @@ export default ({ event, user }) => {
             } else {
                 dispatch(SnackbarActions.error('Unable to book meeting'))
             }
+            setLoading(false)
         },
         onCompleted: res => {
             if (!res) {
@@ -153,6 +174,8 @@ export default ({ event, user }) => {
             setTimeout(() => {
                 setDays(eventDays)
                 setMeetingsLoaded(false)
+                setLoading(false)
+                setShowLocationSelection(false)
                 dispatch(SnackbarActions.success('Meeting booked successfully'))
             }, 500)
         },
@@ -172,14 +195,16 @@ export default ({ event, user }) => {
     if (team) {
         att = [...team.members, team.owner]
     } else {
-        att = user.userId
+        att = [user.userId]
     }
 
-    const bookMeetingAction = meeting => {
+    const bookMeetingAction = (meeting, location) => {
+        setLoading(true)
         bookMeeting({
             variables: {
                 meetingId: meeting._id,
                 attendees: att,
+                location: location,
             },
         })
     }
@@ -209,6 +234,7 @@ export default ({ event, user }) => {
     }
 
     const cancelMeetingAction = meeting => {
+        setLoading(true)
         cancelMeeting({
             variables: { meetingId: meeting._id },
         })
@@ -236,9 +262,6 @@ export default ({ event, user }) => {
                     endTime={meeting.endTime}
                     booked={meeting.attendees.includes(user.userId)}
                     googleMeetLink={meeting.googleMeetLink}
-                    bookAction={() => {
-                        bookMeetingAction(meeting)
-                    }}
                     cancelAction={() => {
                         cancelMeetingAction(meeting)
                     }}
@@ -247,6 +270,7 @@ export default ({ event, user }) => {
                     cardOnClick={() => {
                         cardOnClick(meeting._id)
                     }}
+                    location={meeting.location}
                     showLocationSelection={() => {
                         setMeetingForLocationSelection(meeting)
                         setShowLocationSelection(true)
@@ -278,11 +302,17 @@ export default ({ event, user }) => {
 
     return (
         <>
+            {loading && (
+                <div className={classes.loadingOverlay}>
+                    <CircularProgress
+                        size={48}
+                        className={classes.loadingSpinner}
+                    />
+                </div>
+            )}
             {showLocationSelection && (
                 <MeetingLocationSelection
-                    bookAction={() => {
-                        bookMeetingAction(meetingForLocationSelection)
-                    }}
+                    bookFunction={bookMeetingAction}
                     meetingInfo={meetingForLocationSelection}
                     attendeesCount={att.length + 1}
                     eventId={event._id}

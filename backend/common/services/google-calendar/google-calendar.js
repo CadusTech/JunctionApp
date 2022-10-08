@@ -2,10 +2,7 @@
 const fs = require('fs')
 const { google } = require('googleapis')
 const uuidv4 = require('uuid/v4')
-const {
-    updateMeetingGoogleInfo,
-    cancelMeeting,
-} = require('../../../modules/meeting/helpers')
+const { updateMeetingGoogleInfo } = require('../../../modules/meeting/helpers')
 
 const TOKEN_PATH = `${__dirname}/token.json`
 
@@ -34,7 +31,6 @@ function authorize(credentials, callback, callbackParameter = null) {
     })
 }
 
->>>>>>> separate scripts for google calendar authentication
 const insertEvent = (auth, eventInfo) => {
     const calendar = google.calendar({ version: 'v3', auth })
     calendar.events.insert(
@@ -78,57 +74,65 @@ const deleteEvent = (auth, eventId) => {
 }
 
 const deleteGoogleEvent = eventId => {
-    // Load client secrets from a local file.
-    fs.readFile(`${__dirname}/credentials.json`, (err, content) => {
-        if (err) {
-            console.log('Error loading client secret file:', err)
-            return false
-        }
-        // Authorize a client with credentials, then call the Google Calendar API.
-        authorize(JSON.parse(content), deleteEvent, eventId)
-        return true
-    })
+    try {
+        // Load client secrets from a local file.
+        fs.readFile(`${__dirname}/credentials.json`, (err, content) => {
+            if (err) {
+                console.log('Error loading client secret file:', err)
+                return false
+            }
+            // Authorize a client with credentials, then call the Google Calendar API.
+            authorize(JSON.parse(content), deleteEvent, eventId)
+            return true
+        })
+    } catch (err) {
+        return false
+    }
 }
 
 const createGoogleEvent = event => {
-    const googleEvent = {
-        summary: event.title || 'Junction: meeting with challenge partner',
-        location: event.location || '',
-        description: event.description || '',
-        start: event.start,
-        end: event.end,
-        attendees: event.attendees,
-        conferenceData: {
-            createRequest: {
-                conferenceSolutionKey: {
-                    type: 'hangoutsMeet',
+    try {
+        const googleEvent = {
+            summary: event.title || 'Junction: meeting with challenge partner',
+            location: event.location || '',
+            description: event.description || '',
+            start: event.start,
+            end: event.end,
+            attendees: event.attendees,
+            conferenceData: {
+                createRequest: {
+                    conferenceSolutionKey: {
+                        type: 'hangoutsMeet',
+                    },
+                    requestId: uuidv4(),
                 },
-                requestId: uuidv4(),
             },
-        },
-        reminders: {
-            useDefault: false,
-            overrides: [
-                { method: 'email', minutes: 24 * 60 },
-                { method: 'popup', minutes: 10 },
-            ],
-        },
-    }
-    const eventInfo = {
-        googleEvent,
-        meetingId: event.meetingId,
-    }
-
-    // Load client secrets from a local file.
-    fs.readFile(`${__dirname}/credentials.json`, (err, content) => {
-        if (err) {
-            console.log('Error loading client secret file:', err)
-            return false
+            reminders: {
+                useDefault: false,
+                overrides: [
+                    { method: 'email', minutes: 24 * 60 },
+                    { method: 'popup', minutes: 10 },
+                ],
+            },
         }
-        // Authorize a client with credentials, then call the Google Calendar API.
-        authorize(JSON.parse(content), insertEvent, eventInfo)
-        return true
-    })
+        const eventInfo = {
+            googleEvent,
+            meetingId: event.meetingId,
+        }
+
+        // Load client secrets from a local file.
+        fs.readFile(`${__dirname}/credentials.json`, (err, content) => {
+            if (err) {
+                console.log('Error loading client secret file:', err)
+                return false
+            }
+            // Authorize a client with credentials, then call the Google Calendar API.
+            authorize(JSON.parse(content), insertEvent, eventInfo)
+            return true
+        })
+    } catch (err) {
+        return false
+    }
 }
 
 module.exports = { createGoogleEvent, deleteGoogleEvent }

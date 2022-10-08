@@ -43,6 +43,11 @@ const useStyles = makeStyles(theme => ({
         padding: '0.5em',
         fontWeight: 'bold',
     },
+    locationText: {
+        textAlign: 'center',
+        fontSize: '1.25em',
+        margin: '0 0.5em',
+    },
 }))
 
 export default ({
@@ -56,6 +61,7 @@ export default ({
     meetingInput,
     changeSlotAvailability,
     _id,
+    location,
 }) => {
     const [available, setAvailable] = useState(initiallyAvailable)
     const booked = attendees.length > 0
@@ -89,31 +95,34 @@ export default ({
                 <span>{`${endHour}:${endMin === 0 ? '00' : endMin}`}</span>
             </p>
             {available && booked && (
-                <div className={classes.meetingInfo}>
-                    {googleMeetLink && (
-                        <a
-                            href={googleMeetLink}
-                            target="blank"
-                            style={{ textDecoration: 'none' }}
-                        >
-                            <Button
-                                className={classes.actionButton}
-                                variant="contained"
-                                color="theme_lightgray"
+                <>
+                    <p className={classes.locationText}>{location}</p>
+                    <div className={classes.meetingInfo}>
+                        {googleMeetLink && (
+                            <a
+                                href={googleMeetLink}
+                                target="blank"
+                                style={{ textDecoration: 'none' }}
                             >
-                                Join meeting
-                            </Button>
-                        </a>
-                    )}
-                    <Button
-                        className={classes.actionButton}
-                        variant="contained"
-                        color="error"
-                        onClick={cardOnClick}
-                    >
-                        Cancel
-                    </Button>
-                </div>
+                                <Button
+                                    className={classes.actionButton}
+                                    variant="contained"
+                                    color="theme_lightgray"
+                                >
+                                    Join meeting
+                                </Button>
+                            </a>
+                        )}
+                        <Button
+                            className={classes.actionButton}
+                            variant="contained"
+                            color="error"
+                            onClick={cardOnClick}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </>
             )}
             {!available && booked && (
                 <p className={classes.cancelWarning}>
