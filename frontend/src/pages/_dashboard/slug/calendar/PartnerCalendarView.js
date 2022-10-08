@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { MEETINGS_BULK_ACTION } from 'graphql/mutations/meetings'
 import * as SnackbarActions from 'redux/snackbar/actions'
-import { getMeetingslots } from 'graphql/queries/meetings'
+import { getMeetingSlots } from 'graphql/queries/meetings'
 import PartnerMeetingCard from './PartnerMeetingCard'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos'
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'
@@ -155,7 +155,7 @@ export default ({ event }) => {
     // const [loading, setLoading] = useState(true)
     const [meetingsLoaded, setMeetingsLoaded] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [meetings, meetingsLoading, meetingsError, refetch] = getMeetingslots(
+    const [meetings, meetingsLoading, meetingsError, refetch] = getMeetingSlots(
         {
             eventId: event._id,
             from: event.startTime,

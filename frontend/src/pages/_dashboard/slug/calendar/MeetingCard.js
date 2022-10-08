@@ -107,7 +107,7 @@ export default ({
         <>
             {booked ? (
                 <div className={classes.meetingInfo}>
-                    {googleMeetLink.length !== 0 ? (
+                    {googleMeetLink && (
                         <a
                             className={classes.meetsLink}
                             href={googleMeetLink}
@@ -121,7 +121,7 @@ export default ({
                                 JOIN MEETING
                             </Button>
                         </a>
-                    ) : null}
+                    )}
                     <Button
                         className={classes.actionButton}
                         variant="contained"

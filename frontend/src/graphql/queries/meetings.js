@@ -35,7 +35,7 @@ export const GET_MEETINGS = gql`
     }
     ${MeetingFull}
 `
-export const getMeetingslots = ({ eventId, challengeId, from, to }) => {
+export const getMeetingSlots = ({ eventId, challengeId, from, to }) => {
     const { data, loading, error, refetch } = useQuery(GET_MEETINGS, {
         variables: {
             eventId,
@@ -45,4 +45,22 @@ export const getMeetingslots = ({ eventId, challengeId, from, to }) => {
         },
     })
     return [data?.meetingSlots, loading, error, refetch]
+}
+
+export const getMeetingSlotsWithPolling = ({
+    eventId,
+    challengeId,
+    from,
+    to,
+}) => {
+    const { data, loading, error } = useQuery(GET_MEETINGS, {
+        pollInterval: 5000,
+        variables: {
+            eventId,
+            from,
+            to,
+            challengeId,
+        },
+    })
+    return [data?.meetingSlots, loading, error]
 }

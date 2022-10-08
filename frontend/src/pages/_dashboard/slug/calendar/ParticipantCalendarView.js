@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { BOOK_MEETING, CANCEL_MEETING } from 'graphql/mutations/meetings'
 import * as SnackbarActions from 'redux/snackbar/actions'
-import { getMeetingslots } from 'graphql/queries/meetings'
+import { getMeetingSlotsWithPolling } from 'graphql/queries/meetings'
 import * as DashboardSelectors from 'redux/dashboard/selectors'
 import MeetingCard from './MeetingCard'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos'
@@ -69,12 +69,16 @@ export default ({ event, user }) => {
     const [noOfDaysToShow, setNoOfDaysToShow] = useState(3)
     const dispatch = useDispatch()
     const [meetingsLoaded, setMeetingsLoaded] = useState(false)
-    const [meetings, loading, error] = getMeetingslots({
+    const [meetings, loading, error] = getMeetingSlotsWithPolling({
         eventId: event._id,
         from: event.startTime,
         to: event.endTime,
         challengeId: challenge,
     })
+    useEffect(() => {
+        setDays(eventDays)
+        setMeetingsLoaded(false)
+    }, [meetings])
     const [openCard, setOpenCard] = useState('')
 
     const startDate = new Date(event.startTime)
