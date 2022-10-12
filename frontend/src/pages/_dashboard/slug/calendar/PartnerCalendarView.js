@@ -99,7 +99,7 @@ const useStyles = makeStyles(theme => ({
     },
     loadingOverlay: {
         width: '100%',
-        height: '100%',
+        minHeight: '100vh',
         background: 'rgba(255,255,255,0.6)',
         zIndex: 100,
         position: 'absolute',
@@ -205,6 +205,7 @@ export default ({ event }) => {
             } else {
                 dispatch(SnackbarActions.error('Unable to save changes'))
             }
+            setLoading(false)
         },
         onCompleted: data => {
             const created = data?.meetingSlotsBulkAction.created
@@ -233,8 +234,9 @@ export default ({ event }) => {
                     ),
                 )
                 setTimeout(() => {
+                    setLoading(false)
                     window.location.reload()
-                }, 1500)
+                }, 500)
             }
         },
     })
@@ -268,6 +270,7 @@ export default ({ event }) => {
                 )
                 if (meetingToUpdate) {
                     meetingToUpdate.available = true
+                    meetingToUpdate.location = meeting.location
                     meetingToUpdate._id = meeting._id
                     meetingToUpdate.attendees = meeting.attendees
                     meetingToUpdate.googleMeetLink =
@@ -333,6 +336,7 @@ export default ({ event }) => {
                         endMin={meetingObj.endMin}
                         attendees={meetingObj.attendees}
                         googleMeetLink={meetingObj.googleMeetLink}
+                        location={meetingObj.location}
                         // initiallyAvailable has the current state from db, either available or not, this is used to check if available needs to be added or removed when changed
                         initiallyAvailable={meetingObj.available}
                         changeSlotAvailability={changeSlotAvailability}

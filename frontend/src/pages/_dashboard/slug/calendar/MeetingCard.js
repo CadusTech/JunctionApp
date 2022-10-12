@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
         cursor: 'pointer',
         '&:hover': isOpenable
             ? {
-                  filter: 'brightness(1.1)',
+                  filter: 'brightness(0.95)',
               }
             : {},
     }),
@@ -59,6 +59,11 @@ const useStyles = makeStyles(theme => ({
             borderColor: '#39967a',
         },
     },
+    locationText: {
+        textAlign: 'center',
+        width: '100%',
+        margin: '0.5em',
+    },
 }))
 
 const ButtonBase = withStyles({
@@ -87,11 +92,12 @@ export default ({
     endTime,
     booked,
     googleMeetLink,
-    bookAction,
     cancelAction,
     hasFutureBooking,
     isOpen,
     cardOnClick,
+    showLocationSelection,
+    location,
 }) => {
     const start = new Date(startTime)
     const end = new Date(endTime)
@@ -136,7 +142,7 @@ export default ({
                     className={classes.actionButton}
                     variant="contained"
                     color="primary"
-                    onClick={bookAction}
+                    onClick={showLocationSelection}
                     disabled={hasFutureBooking}
                     tooltipText="You can only have one upcoming meeting at a time."
                 >
@@ -162,7 +168,8 @@ export default ({
                     endMinutes === 0 ? '00' : endMinutes
                 }`}</span>
             </p>
-            {isOpen && openContent()}
+            {booked && <p className={classes.locationText}>{location}</p>}
+            {(isOpen || booked) && openContent()}
         </div>
     )
 }

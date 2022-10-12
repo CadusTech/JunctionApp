@@ -48,6 +48,9 @@ const MeetingType = new GraphQLObjectType({
             googleMeetLink: {
                 type: GraphQLString,
             },
+            location: {
+                type: GraphQLString,
+            },
         }
     },
 })
@@ -158,6 +161,7 @@ const MutationType = new GraphQLObjectType({
             args: {
                 meetingId: { type: GraphQLNonNull(GraphQLString) },
                 attendees: { type: GraphQLNonNull(GraphQLList(GraphQLString)) },
+                location: { type: GraphQLString },
             },
         },
         cancelMeeting: {
@@ -202,7 +206,7 @@ const Resolvers = {
             if (args.meetingId && args.attendees) {
                 return context
                     .controller('Meeting')
-                    .bookMeeting(args.meetingId, args.attendees)
+                    .bookMeeting(args.meetingId, args.attendees, args.location)
             }
             return null
         },
